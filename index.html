@@ -1,281 +1,227 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Trainingscoach – V13.2</title>
-  <link rel="manifest" href="manifest.json">
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0e1116;color:#e6e8eb;margin:0}
-    header{background:#0b6fff;padding:14px 16px;color:#fff;font-weight:700}
-    main{padding:16px;max-width:900px;margin:0 auto}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .card{background:#161b22;border:1px solid #30363d;border-radius:14px;padding:14px;margin:10px 0}
-    .muted{color:#97a1ab;font-size:13px}
-    select,input[type=number],button{border-radius:10px;border:1px solid #30363d;background:#0d1117;color:#e6e8eb;padding:8px}
-    button.primary{background:#238636;border-color:#2ea043}
-    button.ghost{background:#161b22}
-    .ex-name{font-weight:600}
-    .set{display:grid;grid-template-columns:90px 1fr 1fr 1fr;gap:8px;align-items:center}
-    .set label{font-size:12px;color:#97a1ab}
-    .chip{display:inline-block;padding:3px 8px;border-radius:999px;background:#0b6fff1a;border:1px solid #0b6fff33;color:#9cc2ff;font-size:12px;margin-left:6px}
-    .ok{color:#34d058}
-    .warn{color:#f2cc60}
-    .danger{color:#ff7b72}
-    .footer{margin-top:24px;display:flex;gap:10px;flex-wrap:wrap}
-    .kicker{font-size:12px;color:#9da7b1}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A1728">
+<title>Trainingscoach – V13.2</title>
+<style>
+:root{--bg:#0a1728;--card:#111c2f;--text:#eef4ff;--muted:#97a6c1;--accent:#00ba88;}
+*{box-sizing:border-box;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;}
+body{margin:0;background:linear-gradient(180deg,#0a1728,#0d1f35);color:var(--text);}
+header{position:sticky;top:0;background:#0a1728;padding:12px 16px;border-bottom:1px solid #18263f;}
+h1{margin:0;font-size:20px}
+.wrap{padding:16px;max-width:820px;margin:0 auto}
+.card{background:var(--card);border:1px solid #1b2942;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{background:#20324f;border:1px solid #2b426b;color:var(--text);padding:10px 12px;border-radius:10px;cursor:pointer}
+.btn.accent{background:var(--accent);border-color:#0aa37f;color:#03261e;font-weight:700}
+select,input[type="number"],input[type="date"],input[type="text"]{background:#14223a;border:1px solid #22365a;color:var(--text);padding:10px;border-radius:10px}
+.small{color:var(--muted);font-size:12px}
+.exercise{padding:10px;border-radius:12px;background:#0f1b31;border:1px dashed #21375d;margin-top:10px}
+.sets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.sets input{width:100%;text-align:center}
+.badge{background:#132240;border:1px solid #1e3863;color:#b6c7e6;padding:2px 8px;border-radius:999px;font-size:12px}
+hr{border:0;border-top:1px solid #1b2942;margin:12px 0}
+footer{padding:20px;color:#5b6f90;text-align:center}
+</style>
 </head>
 <body>
-  <header>Trainingscoach – V13.2</header>
-  <main>
-    <div class="card">
-      <div class="row">
-        <div style="flex:1">
-          <div class="muted">Heutige Einheit</div>
-          <select id="session">
-            <option value="free_push">Freie Tage – Push</option>
-            <option value="free_pull">Freie Tage – Pull</option>
-            <option value="free_legs">Freie Tage – Beine</option>
-            <option value="free_weak">Freie Tage – Schwachstellen</option>
-            <option value="night_upper">Nachtschicht – Oberkörper</option>
-            <option value="night_lower">Nachtschicht – Unterkörper</option>
-            <option value="night_upper_var">Nachtschicht – Oberkörper (Variante)</option>
-          </select>
-        </div>
-        <div>
-          <div class="muted">Datum</div>
-          <input type="date" id="date">
-        </div>
-        <div style="align-self:flex-end">
-          <button class="primary" id="loadPlanBtn">Plan laden</button>
-        </div>
-      </div>
-      <div class="kicker">Tipp: Du kannst unten **Add-On Übung** hinzufügen (z. B. Überzüge am Kabelzug) und bei jeder Übung per „+ Satz“ einen Zusatz‑Satz loggen.</div>
-    </div>
+<header class="row">
+  <h1>Trainingscoach – V13.2</h1>
+  <span class="badge" id="status">offline-ready</span>
+</header>
+<div class="wrap">
 
-    <div id="workout"></div>
+<div class="card">
+  <div class="row">
+    <button class="btn" id="btnBackup">Backup-Text einfügen</button>
+    <button class="btn" id="btnExport">CSV Export</button>
+    <span class="small">Daten bleiben lokal auf dem Gerät.</span>
+  </div>
+</div>
 
-    <div class="card">
-      <div class="muted">+ Add-On Übung</div>
-      <div class="row">
-        <select id="addon">
-          <option value="pullover_cable">Überzüge am Kabelzug</option>
-          <option value="rear_delt_cable">Reverse Flys Kabel</option>
-          <option value="facepull">Face Pulls</option>
-          <option value="calf_raise">Wadenheben (stehend)</option>
-        </select>
-        <button class="ghost" id="addAddonBtn">Hinzufügen</button>
-      </div>
-      <div class="kicker">Add‑Ons: 2–3×12–15, RIR 1–2. Max. 2 Extras.</div>
-    </div>
+<div class="card">
+  <h3 style="margin:0 0 8px">Empfehlung für heute</h3>
+  <div class="small">Regeln: Pull ≤72h · Push/Beine ≤96h · sonst Zyklus (Push→Pull→Beine→Schwachstellen / Ober↔Unter).</div>
+  <div class="row" style="margin-top:10px">
+    <select id="sessionPick"></select>
+    <button class="btn accent" id="loadPlan">Plan laden</button>
+  </div>
+</div>
 
-    <div class="footer">
-      <button id="saveBtn" class="primary">Satz speichern / Workout sichern</button>
-      <button id="exportBtn">Backup (JSON) speichern</button>
-      <input type="file" id="importFile" accept="application/json" style="display:none">
-      <button id="importBtn">Backup laden</button>
-    </div>
-  </main>
+<div class="card" id="addonsCard">
+  <h3 style="margin:0 0 8px">Add‑On Übung</h3>
+  <div class="row">
+    <select id="addonSelect"></select>
+    <button class="btn" id="addAddon">Hinzufügen</button>
+    <span class="small">Add‑Ons: 2–3×12–15, RIR 1–2. Max. 2 Extras.</span>
+  </div>
+</div>
 
-  <script>
-    const $ = (q) => document.querySelector(q);
-    const storeKey = "tc_v13_logs";
+<div class="card" id="planArea" style="display:none">
+  <div class="row" style="justify-content:space-between">
+    <h3 style="margin:0">Heutige Einheit</h3>
+    <span class="badge" id="todayTag">—</span>
+  </div>
+  <div id="exList"></div>
+  <hr>
+  <div class="row">
+    <button class="btn accent" id="saveWorkout">Workout sichern</button>
+    <span class="small" id="saveHint"></span>
+  </div>
+</div>
 
-    const catalog = {
-      // minimale Kataloge – Platzhalter reichen für das Feature
-      free_push: [
-        {id:"bench_incline_db", name:"Schrägbankdrücken KH", sets:4, repMin:6, repMax:10},
-        {id:"ohp", name:"Schulterdrücken", sets:3, repMin:6, repMax:10},
-        {id:"laterals", name:"Seitheben", sets:3, repMin:12, repMax:15},
-      ],
-      free_pull: [
-        {id:"pullup_wide", name:"Klimmzüge breit", sets:4, repMin:6, repMax:10},
-        {id:"row_tbar", name:"Rudern LH/T-Bar", sets:4, repMin:6, repMax:10},
-        {id:"lat_pulldown", name:"Latzug eng", sets:3, repMin:8, repMax:12}
-      ],
-      free_legs: [
-        {id:"squat_or_press", name:"Kniebeugen/Beinpresse", sets:4, repMin:6, repMax:10},
-        {id:"rdl", name:"Gestrecktes Kreuzheben", sets:3, repMin:6, repMax:10},
-        {id:"leg_ext", name:"Beinstrecker", sets:3, repMin:12, repMax:15},
-        {id:"leg_curl", name:"Beinbeuger", sets:3, repMin:12, repMax:15}
-      ],
-      free_weak: [
-        {id:"incline_db", name:"Schrägbankdrücken KH", sets:3, repMin:6, repMax:10},
-        {id:"butterfly", name:"Butterfly/Kabel", sets:3, repMin:12, repMax:15},
-        {id:"row_one_arm", name:"Rudern einarmig KH", sets:3, repMin:8, repMax:12},
-        {id:"pullup_neutral", name:"Klimmzüge neutral", sets:3, repMin:6, repMax:10},
-        {id:"ohp_machine", name:"Schulterdrücken Maschine", sets:3, repMin:6, repMax:10},
-        {id:"laterals_dropset", name:"Seitheben Dropset", sets:3, repMin:12, repMax:15},
-        {id:"facepull_rev", name:"Face Pulls/Reverse Flys", sets:3, repMin:10, repMax:12},
-        {id:"bi_tri_superset", name:"Bizeps+Trizeps Superset", sets:3, repMin:10, repMax:12}
-      ],
-      night_upper: [
-        {id:"incline_db", name:"Schrägbankdrücken KH", sets:3, repMin:6, repMax:10},
-        {id:"pullups", name:"Klimmzüge/Latziehen", sets:3, repMin:6, repMax:10},
-        {id:"row_low", name:"Rudern Low Row", sets:3, repMin:6, repMax:10},
-        {id:"ohp", name:"Schulterdrücken", sets:3, repMin:6, repMax:10},
-        {id:"laterals", name:"Seitheben", sets:2, repMin:12, repMax:15},
-        {id:"facepull", name:"Face Pulls", sets:2, repMin:12, repMax:15}
-      ],
-      night_lower: [
-        {id:"squat_press", name:"Kniebeugen/Beinpresse", sets:3, repMin:6, repMax:10},
-        {id:"rdl", name:"Gestrecktes KH", sets:3, repMin:6, repMax:10},
-        {id:"leg_ext", name:"Beinstrecker", sets:2, repMin:12, repMax:15},
-        {id:"leg_curl", name:"Beinbeuger", sets:2, repMin:12, repMax:15},
-        {id:"calves", name:"Wadenheben", sets:3, repMin:12, repMax:20},
-        {id:"abs", name:"Bauch", sets:2, repMin:12, repMax:15}
-      ],
-      night_upper_var: [
-        {id:"bench_flat", name:"Flachbankdrücken LH", sets:3, repMin:6, repMax:10},
-        {id:"pullups_close", name:"Klimmzüge eng", sets:3, repMin:6, repMax:10},
-        {id:"row_one", name:"Rudern einarmig", sets:3, repMin:8, repMax:12},
-        {id:"arnold", name:"Arnold Press", sets:3, repMin:6, repMax:10},
-        {id:"laterals_ds", name:"Seitheben Dropset", sets:2, repMin:12, repMax:15},
-        {id:"revfly", name:"Reverse Flys", sets:2, repMin:12, repMax:15}
-      ],
-      // Add‑on Katalog
-      addon: {
-        pullover_cable: {id:"pullover_cable", name:"Überzüge am Kabelzug", sets:2, repMin:12, repMax:15},
-        rear_delt_cable: {id:"rear_delt_cable", name:"Reverse Flys Kabel", sets:2, repMin:12, repMax:15},
-        facepull: {id:"facepull", name:"Face Pulls", sets:2, repMin:12, repMax:15},
-        calf_raise: {id:"calf_raise", name:"Wadenheben (stehend)", sets:3, repMin:12, repMax:20}
-      }
-    };
+</div>
+<footer>V13.2 · Offline‑fähig · © Coach Jonas</footer>
 
-    function fmtTarget(e){ return `${e.sets}×${e.repMin}–${e.repMax}`; }
+<script>
+// ----------------- DATA -----------------
+const PLAN = {
+  sessions: [
+    {id:'night_upper', name:'Nachtschicht – Oberkörper', ex:[
+      {id:'incline_db', name:'Schrägbankdrücken KH', sets:3, repMin:6, repMax:10},
+      {id:'pullups', name:'Klimmzüge/Latzug', sets:3, repMin:6, repMax:10},
+      {id:'row_low', name:'Rudern Low Row', sets:3, repMin:6, repMax:10},
+      {id:'ohp', name:'Schulterdrücken', sets:3, repMin:6, repMax:10},
+      {id:'laterals', name:'Seitheben', sets:2, repMin:12, repMax:15},
+      {id:'facepull', name:'Face Pulls', sets:2, repMin:12, repMax:15},
+    ]},
+    {id:'night_lower', name:'Nachtschicht – Unterkörper', ex:[
+      {id:'squat_press', name:'Kniebeugen/Beinpresse', sets:3, repMin:6, repMax:10},
+      {id:'rdl', name:'Gestrecktes KH', sets:3, repMin:6, repMax:10},
+      {id:'legext', name:'Beinstrecker', sets:2, repMin:12, repMax:15},
+      {id:'legcurl', name:'Beinbeuger', sets:2, repMin:12, repMax:15},
+      {id:'calves', name:'Waden', sets:3, repMin:12, repMax:20},
+      {id:'abs', name:'Bauch', sets:2, repMin:12, repMax:15},
+    ]},
+    {id:'free_push', name:'Freie Tage – Push', ex:[
+      {id:'bench', name:'Flachbankdrücken LH', sets:4, repMin:6, repMax:10},
+      {id:'incline_db', name:'Schrägbankdrücken KH', sets:4, repMin:6, repMax:10},
+      {id:'dips', name:'Dips', sets:3, repMin:8, repMax:12},
+      {id:'ohp', name:'Schulterdrücken', sets:3, repMin:8, repMax:12},
+      {id:'laterals', name:'Seitheben', sets:3, repMin:12, repMax:15},
+      {id:'revfly', name:'Reverse Flys', sets:3, repMin:12, repMax:15},
+      {id:'tri_push', name:'Trizepsdrücken', sets:3, repMin:8, repMax:12},
+    ]},
+    {id:'free_pull', name:'Freie Tage – Pull', ex:[
+      {id:'pullups', name:'Klimmzüge breit', sets:4, repMin:6, repMax:10},
+      {id:'row_tbar', name:'Rudern LH/T‑Bar', sets:4, repMin:6, repMax:10},
+      {id:'lat_narrow', name:'Latzug eng', sets:3, repMin:8, repMax:12},
+      {id:'rdl', name:'Gestrecktes KH', sets:4, repMin:6, repMax:10},
+      {id:'shrugs', name:'Shrugs', sets:3, repMin:10, repMax:12},
+      {id:'bi_curl', name:'Bizepscurls', sets:3, repMin:8, repMax:12},
+      {id:'hammer', name:'Hammercurls', sets:3, repMin:8, repMax:12},
+    ]},
+  ],
+  addonPool: [
+    {id:'cable_pullovers', name:'Überzüge am Kabelzug', sets:3, repMin:12, repMax:15},
+    {id:'revfly', name:'Reverse Flys', sets:2, repMin:12, repMax:15},
+    {id:'facepull', name:'Face Pulls', sets:2, repMin:12, repMax:15},
+  ]
+};
 
-    function renderWorkout(list){
-      const wrap = document.createElement('div');
-      list.forEach((ex,idx)=>{
-        const card = document.createElement('div'); card.className='card';
-        const h = document.createElement('div');
-        h.innerHTML = `<span class="ex-name">${idx+1}. ${ex.name}</span> <span class="chip">${fmtTarget(ex)}</span>`;
-        card.appendChild(h);
+const store = {
+  key: 'coach_logs_v13_2',
+  load(){ try{ return JSON.parse(localStorage.getItem(this.key)||'{"logs":[]}'); }catch(e){ return {logs:[]}; } },
+  save(d){ localStorage.setItem(this.key, JSON.stringify(d)); }
+};
 
-        const setsWrap = document.createElement('div'); setsWrap.style.marginTop='8px';
+function formatTarget(ex){ return `${ex.sets}×${ex.repMin}–${ex.repMax}`; }
 
-        const setCount = ex.sets;
-        const repsArr = Array.from({length:setCount}, ()=>"");
-        const kgArr = Array.from({length:setCount}, ()=>"");
+// ------------- UI helpers --------------
+const sessionPick = document.getElementById('sessionPick');
+PLAN.sessions.forEach(s=>{
+  const o = document.createElement('option'); o.value=s.id; o.textContent=s.name; sessionPick.appendChild(o);
+});
+const addonSelect = document.getElementById('addonSelect');
+PLAN.addonPool.forEach(a=>{
+  const o = document.createElement('option'); o.value=a.id; o.textContent=a.name; addonSelect.appendChild(o);
+});
 
-        function drawSets(){
-          setsWrap.innerHTML='';
-          for(let i=0;i<repsArr.length;i++){
-            const row = document.createElement('div'); row.className='set';
-            row.innerHTML = `
-              <label>Satz ${i+1}</label>
-              <input type="number" min="0" placeholder="Wdh" value="${repsArr[i]}" data-idx="${i}" class="rep">
-              <input type="number" min="0" step="0.5" placeholder="kg" value="${kgArr[i]}" data-idx="${i}" class="kg">
-              <button class="ghost del" data-idx="${i}">–</button>
-            `;
-            setsWrap.appendChild(row);
-          }
-        }
-        drawSets();
+let current = null;
 
-        // Buttons
-        const btnRow = document.createElement('div'); btnRow.style.marginTop='8px';
-        btnRow.innerHTML = `
-          <button class="ghost addSet">+ Satz</button>
-        `;
+document.getElementById('loadPlan').onclick = () => {
+  const sid = sessionPick.value;
+  current = JSON.parse(JSON.stringify(PLAN.sessions.find(s=>s.id===sid)));
+  current.addons = [];
+  buildPlan();
+  document.getElementById('planArea').style.display='block';
+  document.getElementById('todayTag').textContent = current.name;
+};
 
-        // Events
-        btnRow.querySelector('.addSet').onclick = ()=>{
-          repsArr.push(''); kgArr.push(''); drawSets();
-        };
-        setsWrap.addEventListener('click', (e)=>{
-          if(e.target.classList.contains('del')){
-            const i = +e.target.dataset.idx;
-            if(repsArr.length>1){ repsArr.splice(i,1); kgArr.splice(i,1); drawSets(); }
-          }
-        });
-        setsWrap.addEventListener('input',(e)=>{
-          if(e.target.classList.contains('rep')){ repsArr[+e.target.dataset.idx]=e.target.value; }
-          if(e.target.classList.contains('kg')){ kgArr[+e.target.dataset.idx]=e.target.value; }
-        });
+document.getElementById('addAddon').onclick = () => {
+  if(!current){alert('Erst Plan laden.');return;}
+  if(current.addons && current.addons.length>=2){ alert('Max. 2 Add‑Ons.'); return; }
+  const aid = addonSelect.value;
+  const add = JSON.parse(JSON.stringify(PLAN.addonPool.find(a=>a.id===aid)));
+  current.addons = current.addons||[];
+  current.addons.push(add);
+  buildPlan();
+};
 
-        // persist hook
-        ex._getData = ()=>({ id:ex.id, name:ex.name, reps:repsArr.map(v=>+v||0), weight:kgArr.map(v=>+v||0) });
-
-        card.appendChild(setsWrap);
-        card.appendChild(btnRow);
-        wrap.appendChild(card);
-      });
-      $('#workout').innerHTML='';
-      $('#workout').appendChild(wrap);
+function buildPlan(){
+  const exList = document.getElementById('exList');
+  exList.innerHTML = '';
+  const all = [...current.ex, ...(current.addons||[])];
+  all.forEach(ex => {
+    const wrap = document.createElement('div'); wrap.className='exercise';
+    const h = document.createElement('div'); h.className='row'; h.innerHTML = `<strong>${ex.name}</strong> <span class="badge">${formatTarget(ex)}</span>`;
+    wrap.appendChild(h);
+    const sets = document.createElement('div'); sets.className='sets';
+    ex.inputs = ex.inputs || [];
+    for(let i=0;i<ex.sets;i++){
+      const inp = document.createElement('input'); inp.type='number'; inp.placeholder='Wdh'; inp.min=0; inp.step=1;
+      ex.inputs.push(inp); sets.appendChild(inp);
     }
+    wrap.appendChild(sets);
+    const row = document.createElement('div'); row.className='row';
+    const btnPlus = document.createElement('button'); btnPlus.className='btn'; btnPlus.textContent='+ Satz'; 
+    btnPlus.onclick = ()=>{ const n=document.createElement('input'); n.type='number'; n.placeholder='Wdh'; n.min=0;n.step=1; ex.inputs.push(n); sets.appendChild(n); };
+    const note = document.createElement('input'); note.type='text'; note.placeholder='Notiz (optional)'; note.style.flex='1';
+    ex.noteInput = note;
+    row.appendChild(btnPlus); row.appendChild(note);
+    wrap.appendChild(row);
+    exList.appendChild(wrap);
+  });
+}
 
-    function buildFromSession(){
-      const key = $('#session').value;
-      const plan = catalog[key] ? JSON.parse(JSON.stringify(catalog[key])) : [];
-      renderWorkout(plan);
-      window._currentPlan = plan;
-    }
+document.getElementById('saveWorkout').onclick = () => {
+  if(!current){alert('Erst Plan laden.');return;}
+  const payload = {date:new Date().toISOString().slice(0,10), sessionId: current.id, entries: []};
+  const all = [...current.ex, ...(current.addons||[])];
+  all.forEach(ex=>{
+    const reps = ex.inputs.map(i => Number(i.value||0)).filter(v=>v>0);
+    payload.entries.push({exerciseId:ex.id, name:ex.name, reps, note:(ex.noteInput&&ex.noteInput.value)||''});
+  });
+  const data = store.load();
+  data.logs.push(payload);
+  store.save(data);
+  document.getElementById('saveHint').textContent = 'Gespeichert ✓';
+  setTimeout(()=>document.getElementById('saveHint').textContent='',2500);
+};
 
-    function addAddon(){
-      const val = $('#addon').value;
-      if(!window._currentPlan) return;
-      if(window._currentPlan.filter(x=>x.isAddon).length >= 2){
-        alert('Maximal 2 Add-Ons pro Workout.');
-        return;
-      }
-      const tmpl = catalog.addon[val];
-      const ex = JSON.parse(JSON.stringify(tmpl));
-      ex.isAddon = true;
-      window._currentPlan.push(ex);
-      renderWorkout(window._currentPlan);
-    }
+// Backup / CSV
+document.getElementById('btnBackup').onclick = () => {
+  const t = prompt('Backup‑Text einfügen (JSON) – bestehende Daten werden ersetzt.');
+  if(!t) return;
+  try{ const d = JSON.parse(t); if(d && Array.isArray(d.logs)){ store.save(d); alert('Backup importiert.'); } else { alert('Ungültig.'); } }
+  catch(e){ alert('Kein gültiges JSON.'); }
+};
+document.getElementById('btnExport').onclick = () => {
+  const d = store.load();
+  let csv = 'date,session,exercise,reps\n';
+  d.logs.forEach(l=>l.entries.forEach(e=>{
+    csv += `${l.date},${l.sessionId},${e.name.replaceAll(',',';')},${e.reps.join('-')}\n`;
+  }));
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='training_logs.csv'; a.click();
+};
 
-    function saveWorkout(){
-      const date = $('#date').value || new Date().toISOString().slice(0,10);
-      const sess = $('#session').value;
-      const entries = (window._currentPlan||[]).map(ex => ex._getData ? ex._getData() : ex);
-      const payload = { date, sessionId:sess, logs: entries };
-      const store = JSON.parse(localStorage.getItem(storeKey)||'[]');
-      // replace same date+session
-      const idx = store.findIndex(e=>e.date===date && e.sessionId===sess);
-      if(idx>=0) store[idx]=payload; else store.push(payload);
-      localStorage.setItem(storeKey, JSON.stringify(store));
-      alert('Gespeichert.');
-    }
-
-    function exportBackup(){
-      const store = localStorage.getItem(storeKey) || '[]';
-      const name = 'training_backup_'+ (new Date().toISOString().slice(0,10)) + '.json';
-      const blob = new Blob([store], {type:'application/json'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
-      URL.revokeObjectURL(a.href);
-    }
-
-    function importBackupFile(f){
-      const reader = new FileReader();
-      reader.onload = e => {
-        try{
-          const data = JSON.parse(e.target.result);
-          localStorage.setItem(storeKey, JSON.stringify(data));
-          alert('Backup importiert. (' + data.length + ' Einheiten)');
-        }catch(err){ alert('Fehler beim Import'); }
-      };
-      reader.readAsText(f);
-    }
-
-    // wiring
-    $('#loadPlanBtn').onclick = buildFromSession;
-    $('#addAddonBtn').onclick = addAddon;
-    $('#saveBtn').onclick = saveWorkout;
-    $('#exportBtn').onclick = exportBackup;
-    $('#importBtn').onclick = ()=> $('#importFile').click();
-    $('#importFile').addEventListener('change', e => { if(e.target.files[0]) importBackupFile(e.target.files[0]); });
-
-    // init
-    $('#date').value = new Date().toISOString().slice(0,10);
-    buildFromSession();
-
-    // PWA minimal
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('./service-worker.js');
-    }
-  </script>
+// PWA
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('service-worker.js'); }
+</script>
 </body>
 </html>
