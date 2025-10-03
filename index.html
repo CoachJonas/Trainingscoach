@@ -1,12 +1,281 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trainingscoach – V13</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trainingscoach – V13.2</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0e1116;color:#e6e8eb;margin:0}
+    header{background:#0b6fff;padding:14px 16px;color:#fff;font-weight:700}
+    main{padding:16px;max-width:900px;margin:0 auto}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .card{background:#161b22;border:1px solid #30363d;border-radius:14px;padding:14px;margin:10px 0}
+    .muted{color:#97a1ab;font-size:13px}
+    select,input[type=number],button{border-radius:10px;border:1px solid #30363d;background:#0d1117;color:#e6e8eb;padding:8px}
+    button.primary{background:#238636;border-color:#2ea043}
+    button.ghost{background:#161b22}
+    .ex-name{font-weight:600}
+    .set{display:grid;grid-template-columns:90px 1fr 1fr 1fr;gap:8px;align-items:center}
+    .set label{font-size:12px;color:#97a1ab}
+    .chip{display:inline-block;padding:3px 8px;border-radius:999px;background:#0b6fff1a;border:1px solid #0b6fff33;color:#9cc2ff;font-size:12px;margin-left:6px}
+    .ok{color:#34d058}
+    .warn{color:#f2cc60}
+    .danger{color:#ff7b72}
+    .footer{margin-top:24px;display:flex;gap:10px;flex-wrap:wrap}
+    .kicker{font-size:12px;color:#9da7b1}
+  </style>
 </head>
 <body>
-  <h1>Trainingscoach – V13</h1>
-  <p>Neue Version mit Add-On Übung & Zusatz-Satz Funktion.</p>
+  <header>Trainingscoach – V13.2</header>
+  <main>
+    <div class="card">
+      <div class="row">
+        <div style="flex:1">
+          <div class="muted">Heutige Einheit</div>
+          <select id="session">
+            <option value="free_push">Freie Tage – Push</option>
+            <option value="free_pull">Freie Tage – Pull</option>
+            <option value="free_legs">Freie Tage – Beine</option>
+            <option value="free_weak">Freie Tage – Schwachstellen</option>
+            <option value="night_upper">Nachtschicht – Oberkörper</option>
+            <option value="night_lower">Nachtschicht – Unterkörper</option>
+            <option value="night_upper_var">Nachtschicht – Oberkörper (Variante)</option>
+          </select>
+        </div>
+        <div>
+          <div class="muted">Datum</div>
+          <input type="date" id="date">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="primary" id="loadPlanBtn">Plan laden</button>
+        </div>
+      </div>
+      <div class="kicker">Tipp: Du kannst unten **Add-On Übung** hinzufügen (z. B. Überzüge am Kabelzug) und bei jeder Übung per „+ Satz“ einen Zusatz‑Satz loggen.</div>
+    </div>
+
+    <div id="workout"></div>
+
+    <div class="card">
+      <div class="muted">+ Add-On Übung</div>
+      <div class="row">
+        <select id="addon">
+          <option value="pullover_cable">Überzüge am Kabelzug</option>
+          <option value="rear_delt_cable">Reverse Flys Kabel</option>
+          <option value="facepull">Face Pulls</option>
+          <option value="calf_raise">Wadenheben (stehend)</option>
+        </select>
+        <button class="ghost" id="addAddonBtn">Hinzufügen</button>
+      </div>
+      <div class="kicker">Add‑Ons: 2–3×12–15, RIR 1–2. Max. 2 Extras.</div>
+    </div>
+
+    <div class="footer">
+      <button id="saveBtn" class="primary">Satz speichern / Workout sichern</button>
+      <button id="exportBtn">Backup (JSON) speichern</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+      <button id="importBtn">Backup laden</button>
+    </div>
+  </main>
+
+  <script>
+    const $ = (q) => document.querySelector(q);
+    const storeKey = "tc_v13_logs";
+
+    const catalog = {
+      // minimale Kataloge – Platzhalter reichen für das Feature
+      free_push: [
+        {id:"bench_incline_db", name:"Schrägbankdrücken KH", sets:4, repMin:6, repMax:10},
+        {id:"ohp", name:"Schulterdrücken", sets:3, repMin:6, repMax:10},
+        {id:"laterals", name:"Seitheben", sets:3, repMin:12, repMax:15},
+      ],
+      free_pull: [
+        {id:"pullup_wide", name:"Klimmzüge breit", sets:4, repMin:6, repMax:10},
+        {id:"row_tbar", name:"Rudern LH/T-Bar", sets:4, repMin:6, repMax:10},
+        {id:"lat_pulldown", name:"Latzug eng", sets:3, repMin:8, repMax:12}
+      ],
+      free_legs: [
+        {id:"squat_or_press", name:"Kniebeugen/Beinpresse", sets:4, repMin:6, repMax:10},
+        {id:"rdl", name:"Gestrecktes Kreuzheben", sets:3, repMin:6, repMax:10},
+        {id:"leg_ext", name:"Beinstrecker", sets:3, repMin:12, repMax:15},
+        {id:"leg_curl", name:"Beinbeuger", sets:3, repMin:12, repMax:15}
+      ],
+      free_weak: [
+        {id:"incline_db", name:"Schrägbankdrücken KH", sets:3, repMin:6, repMax:10},
+        {id:"butterfly", name:"Butterfly/Kabel", sets:3, repMin:12, repMax:15},
+        {id:"row_one_arm", name:"Rudern einarmig KH", sets:3, repMin:8, repMax:12},
+        {id:"pullup_neutral", name:"Klimmzüge neutral", sets:3, repMin:6, repMax:10},
+        {id:"ohp_machine", name:"Schulterdrücken Maschine", sets:3, repMin:6, repMax:10},
+        {id:"laterals_dropset", name:"Seitheben Dropset", sets:3, repMin:12, repMax:15},
+        {id:"facepull_rev", name:"Face Pulls/Reverse Flys", sets:3, repMin:10, repMax:12},
+        {id:"bi_tri_superset", name:"Bizeps+Trizeps Superset", sets:3, repMin:10, repMax:12}
+      ],
+      night_upper: [
+        {id:"incline_db", name:"Schrägbankdrücken KH", sets:3, repMin:6, repMax:10},
+        {id:"pullups", name:"Klimmzüge/Latziehen", sets:3, repMin:6, repMax:10},
+        {id:"row_low", name:"Rudern Low Row", sets:3, repMin:6, repMax:10},
+        {id:"ohp", name:"Schulterdrücken", sets:3, repMin:6, repMax:10},
+        {id:"laterals", name:"Seitheben", sets:2, repMin:12, repMax:15},
+        {id:"facepull", name:"Face Pulls", sets:2, repMin:12, repMax:15}
+      ],
+      night_lower: [
+        {id:"squat_press", name:"Kniebeugen/Beinpresse", sets:3, repMin:6, repMax:10},
+        {id:"rdl", name:"Gestrecktes KH", sets:3, repMin:6, repMax:10},
+        {id:"leg_ext", name:"Beinstrecker", sets:2, repMin:12, repMax:15},
+        {id:"leg_curl", name:"Beinbeuger", sets:2, repMin:12, repMax:15},
+        {id:"calves", name:"Wadenheben", sets:3, repMin:12, repMax:20},
+        {id:"abs", name:"Bauch", sets:2, repMin:12, repMax:15}
+      ],
+      night_upper_var: [
+        {id:"bench_flat", name:"Flachbankdrücken LH", sets:3, repMin:6, repMax:10},
+        {id:"pullups_close", name:"Klimmzüge eng", sets:3, repMin:6, repMax:10},
+        {id:"row_one", name:"Rudern einarmig", sets:3, repMin:8, repMax:12},
+        {id:"arnold", name:"Arnold Press", sets:3, repMin:6, repMax:10},
+        {id:"laterals_ds", name:"Seitheben Dropset", sets:2, repMin:12, repMax:15},
+        {id:"revfly", name:"Reverse Flys", sets:2, repMin:12, repMax:15}
+      ],
+      // Add‑on Katalog
+      addon: {
+        pullover_cable: {id:"pullover_cable", name:"Überzüge am Kabelzug", sets:2, repMin:12, repMax:15},
+        rear_delt_cable: {id:"rear_delt_cable", name:"Reverse Flys Kabel", sets:2, repMin:12, repMax:15},
+        facepull: {id:"facepull", name:"Face Pulls", sets:2, repMin:12, repMax:15},
+        calf_raise: {id:"calf_raise", name:"Wadenheben (stehend)", sets:3, repMin:12, repMax:20}
+      }
+    };
+
+    function fmtTarget(e){ return `${e.sets}×${e.repMin}–${e.repMax}`; }
+
+    function renderWorkout(list){
+      const wrap = document.createElement('div');
+      list.forEach((ex,idx)=>{
+        const card = document.createElement('div'); card.className='card';
+        const h = document.createElement('div');
+        h.innerHTML = `<span class="ex-name">${idx+1}. ${ex.name}</span> <span class="chip">${fmtTarget(ex)}</span>`;
+        card.appendChild(h);
+
+        const setsWrap = document.createElement('div'); setsWrap.style.marginTop='8px';
+
+        const setCount = ex.sets;
+        const repsArr = Array.from({length:setCount}, ()=>"");
+        const kgArr = Array.from({length:setCount}, ()=>"");
+
+        function drawSets(){
+          setsWrap.innerHTML='';
+          for(let i=0;i<repsArr.length;i++){
+            const row = document.createElement('div'); row.className='set';
+            row.innerHTML = `
+              <label>Satz ${i+1}</label>
+              <input type="number" min="0" placeholder="Wdh" value="${repsArr[i]}" data-idx="${i}" class="rep">
+              <input type="number" min="0" step="0.5" placeholder="kg" value="${kgArr[i]}" data-idx="${i}" class="kg">
+              <button class="ghost del" data-idx="${i}">–</button>
+            `;
+            setsWrap.appendChild(row);
+          }
+        }
+        drawSets();
+
+        // Buttons
+        const btnRow = document.createElement('div'); btnRow.style.marginTop='8px';
+        btnRow.innerHTML = `
+          <button class="ghost addSet">+ Satz</button>
+        `;
+
+        // Events
+        btnRow.querySelector('.addSet').onclick = ()=>{
+          repsArr.push(''); kgArr.push(''); drawSets();
+        };
+        setsWrap.addEventListener('click', (e)=>{
+          if(e.target.classList.contains('del')){
+            const i = +e.target.dataset.idx;
+            if(repsArr.length>1){ repsArr.splice(i,1); kgArr.splice(i,1); drawSets(); }
+          }
+        });
+        setsWrap.addEventListener('input',(e)=>{
+          if(e.target.classList.contains('rep')){ repsArr[+e.target.dataset.idx]=e.target.value; }
+          if(e.target.classList.contains('kg')){ kgArr[+e.target.dataset.idx]=e.target.value; }
+        });
+
+        // persist hook
+        ex._getData = ()=>({ id:ex.id, name:ex.name, reps:repsArr.map(v=>+v||0), weight:kgArr.map(v=>+v||0) });
+
+        card.appendChild(setsWrap);
+        card.appendChild(btnRow);
+        wrap.appendChild(card);
+      });
+      $('#workout').innerHTML='';
+      $('#workout').appendChild(wrap);
+    }
+
+    function buildFromSession(){
+      const key = $('#session').value;
+      const plan = catalog[key] ? JSON.parse(JSON.stringify(catalog[key])) : [];
+      renderWorkout(plan);
+      window._currentPlan = plan;
+    }
+
+    function addAddon(){
+      const val = $('#addon').value;
+      if(!window._currentPlan) return;
+      if(window._currentPlan.filter(x=>x.isAddon).length >= 2){
+        alert('Maximal 2 Add-Ons pro Workout.');
+        return;
+      }
+      const tmpl = catalog.addon[val];
+      const ex = JSON.parse(JSON.stringify(tmpl));
+      ex.isAddon = true;
+      window._currentPlan.push(ex);
+      renderWorkout(window._currentPlan);
+    }
+
+    function saveWorkout(){
+      const date = $('#date').value || new Date().toISOString().slice(0,10);
+      const sess = $('#session').value;
+      const entries = (window._currentPlan||[]).map(ex => ex._getData ? ex._getData() : ex);
+      const payload = { date, sessionId:sess, logs: entries };
+      const store = JSON.parse(localStorage.getItem(storeKey)||'[]');
+      // replace same date+session
+      const idx = store.findIndex(e=>e.date===date && e.sessionId===sess);
+      if(idx>=0) store[idx]=payload; else store.push(payload);
+      localStorage.setItem(storeKey, JSON.stringify(store));
+      alert('Gespeichert.');
+    }
+
+    function exportBackup(){
+      const store = localStorage.getItem(storeKey) || '[]';
+      const name = 'training_backup_'+ (new Date().toISOString().slice(0,10)) + '.json';
+      const blob = new Blob([store], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function importBackupFile(f){
+      const reader = new FileReader();
+      reader.onload = e => {
+        try{
+          const data = JSON.parse(e.target.result);
+          localStorage.setItem(storeKey, JSON.stringify(data));
+          alert('Backup importiert. (' + data.length + ' Einheiten)');
+        }catch(err){ alert('Fehler beim Import'); }
+      };
+      reader.readAsText(f);
+    }
+
+    // wiring
+    $('#loadPlanBtn').onclick = buildFromSession;
+    $('#addAddonBtn').onclick = addAddon;
+    $('#saveBtn').onclick = saveWorkout;
+    $('#exportBtn').onclick = exportBackup;
+    $('#importBtn').onclick = ()=> $('#importFile').click();
+    $('#importFile').addEventListener('change', e => { if(e.target.files[0]) importBackupFile(e.target.files[0]); });
+
+    // init
+    $('#date').value = new Date().toISOString().slice(0,10);
+    buildFromSession();
+
+    // PWA minimal
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./service-worker.js');
+    }
+  </script>
 </body>
 </html>
