@@ -1,6 +1,6 @@
 self.addEventListener("install", (e) => {
   e.waitUntil(
-    caches.open("coach-cache-v1").then((cache) =>
+    caches.open("coach-cache-v12").then((cache) =>
       cache.addAll([
         "./",
         "./index.html",
