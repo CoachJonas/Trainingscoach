@@ -1,5 +1,5 @@
 {
-  "name": "Trainingscoach",
+  "name": "Trainingscoach – V13.4",
   "short_name": "Coach",
   "start_url": "index.html",
   "display": "standalone",
@@ -8,8 +8,8 @@
   "icons": [
     {
       "src": "icon.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
