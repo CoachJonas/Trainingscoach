@@ -1,10 +1,10 @@
 {
-  "name": "Trainingscoach",
+  "name": "Trainingscoach – V13.6 (Auto)",
   "short_name": "Coach",
-  "start_url": "./index.html",
+  "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#0B1220",
-  "theme_color": "#0B1220",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
   "icons": [
     {
       "src": "icon.png",
