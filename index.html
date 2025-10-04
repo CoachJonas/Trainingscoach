@@ -1,1 +1,210 @@
-<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Trainingscoach – V13.5</title><link rel='manifest' href='manifest.json'></head><body><h1>Trainingscoach V13.5 bereit</h1><p>Lade später die vollständige Datei hoch.</p><script>if('serviceWorker'in navigator){navigator.serviceWorker.register('./service-worker.js')}</script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Trainingscoach V13.5</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#0B1220">
+<style>
+  :root{--bg:#0B1220;--card:#0F172A;--muted:#94A3B8;--txt:#E2E8F0;--accent:#60A5FA;--accent2:#34D399;--danger:#F87171}
+  html,body{background:var(--bg);color:var(--txt);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0}
+  .wrap{max-width:840px;margin:24px auto;padding:0 12px}
+  .h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .badge{background:#0e1a33;color:#9cc1ff;border:1px solid #1e3a8a;padding:4px 10px;border-radius:10px;font-weight:700}
+  .card{background:var(--card);border:1px solid #1F2937;border-radius:14px;padding:14px;margin:14px 0;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:160px}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+  input,select,textarea,button{width:100%;box-sizing:border-box;border-radius:10px;border:1px solid #334155;background:#0b1325;color:var(--txt);padding:10px}
+  button.primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);border:none}
+  button.ghost{background:transparent;border:1px dashed #334155}
+  .muted{color:var(--muted)}
+  .ex{border:1px solid #22304b;border-radius:12px;padding:10px;margin:10px 0}
+  .ex h3{margin:0 0 8px 0;font-size:18px}
+  .setgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .setgrid input{text-align:center}
+  .hint{font-size:12px;color:#a3bffa}.ok{color:var(--accent2)}.warn{color:#fbbf24}.danger{color:var(--danger)}
+  .pill{display:inline-block;background:#13233f;border:1px solid #2b3f6b;border-radius:999px;padding:4px 10px;margin-right:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="h"><h1 style="margin:0">Trainingscoach</h1><span class="badge">V13.5</span></div>
+  <div class="card">
+    <div class="row">
+      <div><button id="btnImport" class="ghost">Backup‑Text einfügen</button></div>
+      <div><button id="btnCsv" class="ghost">CSV Export</button></div>
+      <div><button id="btnHome" class="ghost">Zum Home‑Bildschirm (Hinweis)</button></div>
+    </div>
+    <div class="muted">Offline‑fähig · Daten bleiben lokal</div>
+  </div>
+  <div class="card">
+    <div class="muted">Empfehlung: Pull ≤72 h, Push/Beine ≤96 h; sonst Zyklus. Nachtschicht: Ober/Unter im Wechsel.</div>
+    <div class="row" style="margin-top:10px">
+      <div><label>Nachtschicht heute?</label><input type="checkbox" id="night"></div>
+      <div><label>Datum</label><input type="date" id="date"></div>
+    </div>
+    <div class="row"><div><button id="btnSuggest" class="ghost">Empfehlung anzeigen</button></div></div>
+    <div id="suggestBox" class="pill" style="display:none"></div>
+    <div class="row"><div><button id="btnApply" class="primary">Übernehmen</button></div></div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div><label>Heutige Einheit</label><select id="session"></select></div>
+      <div style="align-self:flex-end"><button id="loadPlan" class="primary">Plan laden</button></div>
+    </div>
+    <div id="exList"></div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Add‑On Übung (max. 2 pro Tag)</h3>
+    <div class="row">
+      <div style="max-width:80px"><input type="number" id="addonCount" value="0" min="0" max="2"></div>
+      <div><button id="addAddon" class="ghost">+ hinzufügen</button></div>
+    </div>
+    <div class="muted">Add‑Ons: 2–3×12–15, RIR 1–2. Max. 2 Extras.</div>
+    <div id="addons"></div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div><button id="btnSave" class="primary">Heutige Einheit speichern</button></div>
+      <div><button id="btnClear" class="ghost">Heutige Einheit leeren</button></div>
+    </div>
+    <div id="saveMsg" class="muted"></div>
+  </div>
+  <p class="muted" style="text-align:center">© Coach — V13.5</p>
+</div>
+<script>
+const plan = {
+  "Nacht – Oberkörper":[
+    {id:"tri_push",name:"Schrägbankdrücken KH",scheme:"3x6–10"},
+    {id:"pullups",name:"Klimmzüge/Latzug",scheme:"3x6–10"},
+    {id:"row_tbar",name:"Rudern Low Row",scheme:"3x6–10"},
+    {id:"ohp",name:"Schulterdrücken",scheme:"3x6–10"},
+    {id:"laterals",name:"Seitheben",scheme:"2x12–15"},
+    {id:"facepull",name:"Face Pulls",scheme:"2x12–15"}
+  ],
+  "Nacht – Unterkörper":[
+    {id:"squat",name:"Kniebeugen/Beinpresse",scheme:"3x6–10"},
+    {id:"rdl",name:"Gestrecktes KH",scheme:"3x6–10"},
+    {id:"legext",name:"Beinstrecker",scheme:"2x12–15"},
+    {id:"legcurl",name:"Beinbeuger",scheme:"2x12–15"},
+    {id:"calf",name:"Wadenheben",scheme:"3x12–20"},
+    {id:"abs",name:"Bauch",scheme:"2x12–15"}
+  ],
+  "Push":[
+    {id:"bench_lh",name:"Flachbankdrücken LH",scheme:"4x6–10"},
+    {id:"incl_db",name:"Schrägbankdrücken KH",scheme:"4x6–10"},
+    {id:"dips",name:"Dips",scheme:"3x8–12"},
+    {id:"ohp",name:"Schulterdrücken",scheme:"3x6–10"},
+    {id:"laterals",name:"Seitheben",scheme:"3x12–15"},
+    {id:"revfly",name:"Reverse Flys",scheme:"3x12–15"},
+    {id:"tri_push",name:"Trizepsdrücken",scheme:"3x8–12"}
+  ],
+  "Pull":[
+    {id:"pullups",name:"Klimmzüge breit",scheme:"4x6–10"},
+    {id:"row_tbar",name:"Rudern LH/T‑Bar",scheme:"4x6–10"},
+    {id:"lat_narrow",name:"Latzug eng",scheme:"3x8–12"},
+    {id:"rdl",name:"Gestrecktes KH",scheme:"4x6–10"},
+    {id:"shrugs",name:"Shrugs",scheme:"3x10–12"},
+    {id:"curl_bb",name:"Bizepscurls",scheme:"3x8–12"},
+    {id:"curl_hammer",name:"Hammercurls",scheme:"3x8–12"}
+  ],
+  "Beine":[
+    {id:"squat",name:"Kniebeugen/Beinpresse",scheme:"4x6–10"},
+    {id:"front",name:"Frontkniebeugen",scheme:"3x8–12"},
+    {id:"legext",name:"Beinstrecker",scheme:"3x12–15"},
+    {id:"rdl",name:"Gestrecktes KH",scheme:"4x6–10"},
+    {id:"ham",name:"Beinbeuger",scheme:"3x12–15"},
+    {id:"calf",name:"Waden stehend",scheme:"4x10–20"},
+    {id:"calf2",name:"Waden sitzend",scheme:"3x12–20"},
+    {id:"abs",name:"Bauch",scheme:"3x12–15"}
+  ],
+  "Schwachstellen":[
+    {id:"incl_db",name:"Schrägbankdrücken KH",scheme:"3x6–10"},
+    {id:"butterfly",name:"Butterfly/Kabel",scheme:"3x12–15"},
+    {id:"row_one",name:"Rudern einarmig KH",scheme:"3x8–12"},
+    {id:"pullups_neutral",name:"Klimmzüge neutral",scheme:"3x6–10"},
+    {id:"ohp_m",name:"Schulterdrücken Maschine",scheme:"3x6–10"},
+    {id:"laterals_drop",name:"Seitheben Drop‑Set",scheme:"3x12–15"},
+    {id:"face_rev",name:"Face Pulls/Reverse Flys",scheme:"3x10–12"},
+    {id:"arm_ss",name:"Bizeps+Trizeps Superset",scheme:"3x10–12"}
+  ]
+};
+const ADDON_OPTIONS = ["Überzüge am Kabelzug","Seitheben am Kabel","Bauch (Hanging Raises)","Wadenheben Maschine"];
+const LS_KEY = "coach_v13_5";
+const store = JSON.parse(localStorage.getItem(LS_KEY) || '{"logs":{},"meta":{}}');
+function saveStore(){ localStorage.setItem(LS_KEY, JSON.stringify(store)); }
+const $ = s => document.querySelector(s);
+const exList = $("#exList"), addonsBox = $("#addons");
+const sessionSel = $("#session"); Object.keys(plan).forEach(k=>{ let o=document.createElement("option"); o.value=k;o.textContent=k; sessionSel.appendChild(o);});
+if(!store.meta.nightNext){ store.meta.nightNext = "Nacht – Oberkörper"; }
+$("#date").value = new Date().toISOString().slice(0,10);
+
+function parseRange(s){ const m=s.match(/(\d+)x(\d+)[–-](\d+)/); if(!m) return {sets:3,min:8,max:12}; return {sets:+m[1],min:+m[2],max:+m[3]}; }
+function exerciseBlock(ex){
+  const range=parseRange(ex.scheme); const id=ex.id; const w=document.createElement("div"); w.className="ex"; w.dataset.exId=id;
+  w.innerHTML=`<h3>${ex.name} <span class="pill">${ex.scheme}</span> <span class="hint" id="hint-${id}"></span></h3>
+  <div class="setgrid">${Array.from({length:range.sets}).map((_,i)=>`<input type="number" placeholder="Wdh" data-i="${i}" class="rep">`).join("")}
+  <input type="number" placeholder="Gewicht (kg)" step="0.5" class="kg"></div>
+  <textarea rows="2" placeholder="Notiz (optional) – z. B. Griff / Tempo / RPE" class="note"></textarea>`;
+  const key = `${$("#date").value}|${sessionSel.value}|${id}`;
+  if(store.logs[key]){ const p=store.logs[key]; w.querySelectorAll(".rep").forEach((inp,i)=> inp.value=(p.reps[i]??"")); w.querySelector(".kg").value=p.kg??""; w.querySelector(".note").value=p.note??""; }
+  const last=findLastForExercise(id); const hint=w.querySelector(`#hint-${id}`);
+  if(last){ const decision=suggestNext(last,range); hint.innerHTML=decision.msg; hint.className="hint "+(decision.type||""); }
+  return w;
+}
+function renderExercises(){ exList.innerHTML=""; (plan[sessionSel.value]||[]).forEach(ex=> exList.appendChild(exerciseBlock(ex))); }
+function addAddon(){
+  if(addonsBox.children.length>=2){ alert("Maximal 2 Add‑Ons."); return; }
+  const name=prompt("Add‑On eingeben (z. B. Überzüge am Kabelzug)\n\nVorschläge: "+ADDON_OPTIONS.join(", "),"Überzüge am Kabelzug");
+  if(!name)return;
+  const el=exerciseBlock({id:"addon_"+Date.now(),name,scheme:"3x12–15"}); addonsBox.appendChild(el);
+}
+function getEntries(){
+  const date=$("#date").value, session=sessionSel.value; const blocks=[...exList.children, ...addonsBox.children]; const entries=[];
+  blocks.forEach(b=>{ const id=b.dataset.exId; const reps=[...b.querySelectorAll(".rep")].map(i=>+i.value||0).filter(v=>v>0);
+    const kg=+b.querySelector(".kg").value||0; const note=b.querySelector(".note").value||""; entries.push({date,session,id,reps,kg,note});});
+  return entries;
+}
+function persistToday(){ getEntries().forEach(e=>{ const key=`${e.date}|${e.session}|${e.id}`; store.logs[key]={reps:e.reps,kg:e.kg,note:e.note};}); saveStore(); $("#saveMsg").textContent="Gespeichert · "+new Date().toLocaleTimeString();}
+function clearToday(){ exList.innerHTML=""; addonsBox.innerHTML=""; }
+function findLastForExercise(exId){
+  const rec=Object.entries(store.logs).filter(([k,v])=>k.endsWith("|"+exId)).map(([k,v])=>({date:k.split("|")[0],data:v})).sort((a,b)=>a.date<b.date?1:-1);
+  return rec[0]?.data||null;
+}
+function suggestNext(last,range){
+  const enough=last.reps.length>=range.sets; const allHit=enough && last.reps.slice(0,range.sets).every(r=>r>=range.max);
+  if(allHit){ return {type:"ok",msg:`Vorschlag: <b>+2,5 kg</b> (zuletzt ${last.reps.join("/")})`}; }
+  return {type:"warn",msg:`Vorschlag: <b>Gewicht beibehalten</b> (zuletzt ${last.reps.join("/")})`};
+}
+function humanSuggestion(){
+  const lastPull=lastDoneOf("Pull"), lastPush=lastDoneOf("Push"), lastLegs=lastDoneOf("Beine");
+  function hoursSince(d){ return d?((Date.now()-new Date(d).getTime())/36e5):1e9; }
+  const hp=hoursSince(lastPull), hs=hoursSince(lastPush), hb=hoursSince(lastLegs);
+  if($("#night").checked){ return store.meta.nightNext||"Nacht – Oberkörper"; }
+  if(hp<=72 || hs<=72 || hb<=96){
+    const arr=[["Pull",hp,72],["Push",hs,72],["Beine",hb,96]].filter(x=>x[1]>=x[2]).sort((a,b)=>b[1]-a[1]); if(arr.length) return arr[0][0];
+  }
+  const order=["Push","Pull","Beine","Schwachstellen"]; const last=store.meta.lastFree||null; const idx=last?(order.indexOf(last)+1)%order.length:0; return order[idx];
+}
+function lastDoneOf(name){ const r=Object.keys(store.logs).filter(k=>k.includes("|"+name+"|")).map(k=>k.split("|")[0]).sort().reverse(); return r[0]||null; }
+
+$("#loadPlan").onclick=renderExercises;
+$("#addAddon").onclick=addAddon;
+$("#btnClear").onclick=clearToday;
+$("#btnSave").onclick=()=>{ persistToday(); alert("Gespeichert!"); };
+$("#btnCsv").onclick=()=>{
+  let rows=[["date","session","exercise","kg","reps","note"]];
+  Object.entries(store.logs).forEach(([k,v])=>{ const [date,session,ex]=k.split("|"); rows.push([date,session,ex,v.kg,(v.reps||[]).join("/"),(v.note||"").replace(/\n/g," ")]); });
+  const csv=rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="training_logs.csv"; a.click();
+};
+$("#btnImport").onclick=()=>{
+  const txt=prompt("Backup‑Text hier einfügen (ganze JSON aus der App). Vorsicht: überschreibt lokale Daten.");
+  if(!txt)return; try{ const data=JSON.parse(txt); if(data.logs){ localStorage.setItem(LS_KEY, JSON.stringify(data)); alert("Backup übernommen."); location.reload(); } else alert("Ungültiges Backup."); }catch(e){ alert("Konnte JSON nicht lesen."); }
+};
+$("#btnHome").onclick=()=>{ alert("iPhone: Teilen‑Symbol ▢⬆️ → 'Zum Home‑Bildschirm'. Beim ersten Öffnen offlinefähig."); };
+$("#btnSuggest").onclick=()=>{ const s=humanSuggestion(); const b=$("#suggestBox"); b.style.display="inline-block"; b.textContent="Nächste empfohlene Einheit: "+s; };
+$("#btnApply").onclick=()=>{ const s=humanSuggestion(); sessionSel.value=s; renderExercises(); if($("#night").checked){ store.meta.nightNext=(s==="Nacht – Oberkörper")?"Nacht – Unterkörper":"Nacht – Oberkörper"; } else { store.meta.lastFree=s; } saveStore(); };
+// SW
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./service-worker.js'); }
+</script>
+</body></html>
