@@ -3,83 +3,85 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Trainingscoach – V13.6 (Auto)</title>
+<title>TrainingCoach V13.7 – Mr. Universe Edition</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b1020">
+<meta name="theme-color" content="#0a0f1c">
 <style>
-:root{--bg:#0b1020;--panel:#0f1830;--text:#eaf0ff;--muted:#93a3b8;--accent:#60a5fa}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(180deg,#0b1020,#0e1730);color:var(--text)}
-header{position:sticky;top:0;z-index:5;background:#0b1228;border-bottom:1px solid #1f2f58;padding:14px 16px;display:flex;gap:12px;align-items:center}
-h1{font-size:20px;margin:0;font-weight:700}.badge{font-size:12px;background:#132240;color:#93c5fd;padding:4px 8px;border-radius:999px;margin-left:8px}
-main{padding:16px;display:flex;flex-direction:column;gap:14px}
-.panel{background:var(--panel);border:1px solid #1a2a52;border-radius:14px;padding:14px}
+:root{--bg:#0a0f1c;--panel:#0d162a;--card:#0b1222;--line:#1b2c4f;--text:#e9eefc;--muted:#9bb0d1;--accent:#60a5fa;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(180deg,#090e1a,#0c1428);color:var(--text)}
+header{position:sticky;top:0;z-index:10;background:#0a1120;border-bottom:1px solid var(--line);padding:12px 14px;display:flex;gap:10px;align-items:center}
+h1{font-size:18px;margin:0;font-weight:700}.badge{font-size:11px;background:#0f2144;color:#bde0ff;padding:3px 8px;border-radius:999px;margin-left:8px}
+a.nav{margin-left:auto;color:#93c5fd;text-decoration:none;border:1px solid var(--line);padding:6px 10px;border-radius:10px}
+main{padding:12px;display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-button{background:#132240;color:#e2e8f0;border:1px solid #223b6a;padding:10px 14px;border-radius:10px;font-weight:600}
+button{background:#122242;color:#e2e8f0;border:1px solid #274b87;padding:10px 14px;border-radius:10px;font-weight:600}
 button.primary{background:#3b82f6;border-color:#3b82f6}
-input,select,textarea{background:#0b1220;color:#e5e7eb;border:1px solid #223b6a;border-radius:10px;padding:10px}
+input,select,textarea{background:#0a1120;color:#e5e7eb;border:1px solid #223b6a;border-radius:10px;padding:10px}
 .muted{color:var(--muted);font-size:12px}
-.card{background:#0b1220;border:1px solid #1a2a52;border-radius:14px;padding:12px;margin-top:8px}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(72px,1fr));gap:8px}
-.tag{font-size:11px;background:#0b1220;border:1px solid #223b6a;padding:2px 8px;border-radius:999px;color:#93c5fd}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(64px,1fr));gap:8px}
+.tag{font-size:11px;background:#0a1120;border:1px solid #223b6a;padding:2px 8px;border-radius:999px;color:#93c5fd}
 .small{font-size:12px}
-.right{margin-left:auto}
-footer{text-align:center;color:#8fa3c5;padding:24px 0}
+.up{color:var(--good)} .down{color:var(--bad)} .hold{color:#60a5fa}
+.status{display:flex;gap:8px;flex-wrap:wrap}
+.status .chip{padding:4px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;background:#0a1120}
+.status .ok{border-color:#195a2d;color:#9af0b1}
+.status .warn{border-color:#5a4019;color:#ffd58a}
+footer{text-align:center;color:#8fa3c5;padding:18px 0}
+hr.sep{border:none;border-top:1px dashed var(--line);margin:10px 0}
 </style>
 </head>
 <body>
-<header><h1>Trainingscoach <span class="badge">V13.6 – Auto</span></h1></header>
-
+<header>
+  <h1>TrainingCoach <span class="badge">V13.7</span></h1>
+  <a class="nav" href="settings.html">Einstellungen</a>
+</header>
 <main>
   <div class="panel">
     <div class="row">
-      <button id="btnPaste">Backup-Text einfügen</button>
-      <button id="btnExport">CSV Export</button>
       <button id="btnInstall">Zum Home-Bildschirm</button>
-      <span class="muted">Offline · Autosave · Auto-Progression</span>
+      <button id="btnExportJSON">Backup exportieren (JSON)</button>
+      <label class="row" style="gap:6px"><input type="file" id="fileJSON" accept="application/json" style="display:none"><button id="btnImportJSON">Backup laden</button></label>
+      <button id="btnExportCSV">CSV Export</button>
+      <span class="muted">Offline · Autosave · Intelligente Progression · Muskel-Check</span>
     </div>
   </div>
-
   <div class="panel">
-    <div class="muted">Empfehlung: Pull ≤72 h, Push/Beine ≤96 h · Nachtschicht: Ober/Unter im Wechsel.</div>
-    <div class="row" style="margin-top:10px">
-      <label class="row" style="align-items:center;gap:8px">
-        <input type="checkbox" id="nightShift"> Nachtschicht heute?
-      </label>
-      <input type="date" id="datePick">
-      <button id="btnSuggest">Empfehlung anzeigen</button>
-      <div id="suggestBox" class="row right"></div>
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div class="row">
+        <label class="row" style="align-items:center;gap:8px"><input type="checkbox" id="nightShift"> Nachtschicht heute?</label>
+        <input type="date" id="datePick">
+        <button id="btnSuggest" class="primary">Coach-Empfehlung</button>
+      </div>
+      <div id="suggestBox" class="row"></div>
     </div>
+    <hr class="sep">
+    <div><div class="small muted">Muskel-Abdeckung (letzte 7 Tage)</div><div id="muscleStatus" class="status"></div></div>
   </div>
-
   <div class="panel">
     <div class="row" style="justify-content:space-between">
-      <h2 style="margin:0;font-size:18px">Heutige Einheit</h2>
+      <h2 style="margin:0;font-size:16px">Heutige Einheit</h2>
       <button id="btnLoadPlan" class="primary">Plan laden</button>
     </div>
     <div id="todayBox"></div>
-    <div class="muted" style="margin-top:8px">Eingaben werden automatisch gespeichert und fließen in die nächste Empfehlung.</div>
+    <div class="muted" style="margin-top:6px">Eingaben werden automatisch gespeichert und in die nächste Empfehlung übernommen.</div>
   </div>
-
   <div class="panel">
-    <h2 style="margin:0;font-size:18px">Add-On Übung (max. 2)</h2>
-    <div class="row" style="margin-top:10px">
+    <h2 style="margin:0;font-size:16px">Add-Ons & Extrasatz</h2>
+    <div class="row" style="margin-top:8px">
       <select id="addonSelect"></select>
-      <button id="btnAddOn">+ hinzufügen</button>
+      <button id="btnAddOn">+ Übung hinzufügen</button>
+      <button id="btnExtraSet">+ Extrasatz zu allen</button>
     </div>
-    <div id="addonsBox" class="muted" style="margin-top:6px">—</div>
   </div>
 </main>
-
-<footer>© Coach – V13.6</footer>
-
+<footer>© TrainingCoach 13.7</footer>
 <script>
 const $=(q,el=document)=>el.querySelector(q);
 const $$=(q,el=document)=>Array.from(el.querySelectorAll(q));
 const fmtDate=(d=new Date())=>{const z=d.getTimezoneOffset()*60000;return new Date(Date.now()-z).toISOString().slice(0,10)};
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
-
-// -------- Plans (aus deinem ultimativen Plan) --------
 const PLANS={
   night_upper:[{id:"incl_db",name:"Schrägbankdrücken KH",sets:3,reps:[6,10],type:"press"},{id:"pullup",name:"Klimmzüge/Latzug",sets:3,reps:[6,10],type:"row"},{id:"row_low",name:"Rudern Low Row",sets:3,reps:[6,10],type:"row"},{id:"ohp",name:"Schulterdrücken",sets:3,reps:[6,10],type:"press"},{id:"laterals",name:"Seitheben",sets:2,reps:[12,15],type:"iso"},{id:"facepull",name:"Face Pulls",sets:2,reps:[12,15],type:"iso"}],
   night_lower:[{id:"squat_press",name:"Kniebeugen/Beinpresse",sets:3,reps:[6,10],type:"lower"},{id:"rdl",name:"Gestrecktes KH",sets:3,reps:[6,10],type:"lower"},{id:"legext",name:"Beinstrecker",sets:2,reps:[12,15],type:"iso"},{id:"legcurl",name:"Beinbeuger",sets:2,reps:[12,15],type:"iso"},{id:"calf",name:"Wadenheben",sets:3,reps:[12,20],type:"iso"},{id:"abs",name:"Bauch",sets:2,reps:[12,15],type:"iso"}],
@@ -89,187 +91,203 @@ const PLANS={
 };
 const ADDONS=[{id:"cable_pullover",name:"Überzüge am Kabelzug",sets:3,reps:[12,15],type:"iso"},{id:"rear_delt_cable",name:"Reverse Flys (Kabel)",sets:2,reps:[12,15],type:"iso"},{id:"facepull_add",name:"Face Pulls",sets:2,reps:[12,15],type:"iso"},{id:"rope_crunch",name:"Cable Crunch",sets:3,reps:[12,15],type:"iso"}];
 
-// -------- State --------
 const state={
-  logs:store.get("logs",[]), // {date,sessionId,exerciseId,weight,reps[],note}
-  lastSessions:store.get("lastSessions",{}), // sessionId -> date
-  today:store.get("today",{date:fmtDate(),sessionId:null,exercises:[],addons:[]})
+  logs:store.get("logs",[]),
+  lastSessions:store.get("lastSessions",{}),
+  today:store.get("today",{date:fmtDate(),sessionId:null,exercises:[],addons:[]}),
+  steps:store.get("steps",{iso:0.5,press:1.0,row:1.0,lower:2.5}),
+  caps:store.get("caps",{iso:{up:3,down:2},press:{up:3,down:2},row:{up:3,down:2},lower:{up:2,down:2}}),
+  plates:store.get("plates",{quantum:0.5})
 };
-
-// -------- Helpers --------
-const STEP={ iso:0.5, press:1.0, row:1.0, lower:2.5 };
+function roundTo(v,q){ return Math.round(v/q)*q; }
 function lastLogs(exId,n=2){ return state.logs.filter(l=>l.exerciseId===exId).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,n); }
-function avg(arr){ return arr.length? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
-
-function decideNextWeight(ex){
-  // nutzt die letzte Einheit (und optional die vorletzte als Trend)
-  const history = lastLogs(ex.id, 2);
-  const step = STEP[ex.type] || 1.0;
-  const [low, high] = ex.reps;
-  if(history.length===0 || history[0].weight==null){
-    return { next: null, reason: "neu einarbeiten", showRange: `${ex.sets}×${low}–${high}` };
+const avg = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : 0;
+function stepFor(ex){ return (state.steps[ex.id] ?? state.steps[ex.type] ?? {iso:0.5,press:1.0,row:1.0,lower:2.5}[ex.type] ?? 1.0); }
+function capFor(ex){ return (state.caps[ex.type] ?? {up:2,down:2}); }
+function decideNext(ex){
+  const [low,high]=ex.reps;
+  const hist=lastLogs(ex.id,2);
+  if(hist.length===0 || hist[0].weight==null){
+    return {action:"new", nextWeight:null, nextRange:`${ex.sets}×${low}–${high}`, reason:"neu einarbeiten"};
   }
-  const cur = history[0];
-  const prev = history[1];
-  const repsCur = cur.reps || [];
-  const meanCur = avg(repsCur);
-  const trend = prev ? (meanCur - avg(prev.reps||[])) : 0;
+  const cur=hist[0], prev=hist[1];
+  const repsCur=cur.reps||[];
+  const mCur=avg(repsCur);
+  const mPrev=prev? avg(prev.reps||[]) : null;
+  const trend = mPrev!==null ? (mCur - mPrev) : 0;
+  const worst = repsCur.length? Math.min(...repsCur) : 0;
+  const stepBase = stepFor(ex);
+  const cap = capFor(ex);
+  const q = state.plates.quantum||0.5;
 
-  const allHigh = repsCur.length>=ex.sets && repsCur.every(r => r >= Math.min(9, high));
-  const anyLow  = repsCur.some(r => r < low);
-
-  let next = cur.weight;
-  if(allHigh){
-    next = +(next + step).toFixed(1);
-    return { next, reason: "alle Sätze hoch → steigern", showRange: `${ex.sets}×${low}–8` };
+  if(worst >= high){
+    let mult = 1;
+    if(worst >= high+2) mult = Math.min(cap.up, 2);
+    if(worst >= high+4) mult = Math.min(cap.up, 3);
+    let next = roundTo(cur.weight + mult*stepBase, q);
+    return {action:"up", nextWeight:next, nextRange:`${ex.sets}×${low}–8`, reason:`≥${high} → +${mult}×Schritt`};
   }
-  if(anyLow){
-    // nur reduzieren, wenn Trend zusätzlich negativ ist (verhindert zu häufiges Senken, wenn nur 1 Satz schwächelt)
-    if(trend < -0.5){
-      next = Math.max(0, +(next - step).toFixed(1));
-      return { next, reason: "untere Range + Trend schlecht → senken", showRange: `${ex.sets}×${low}–${high}` };
-    }
-    // sonst halten und Reps erst hochziehen
-    return { next, reason: "untere Range einmalig → halten", showRange: `${ex.sets}×${low}–${high}` };
+  if(worst < low){
+    let mult = 1;
+    if((low-worst) >= 2 || trend <= -1) mult = Math.min(cap.down, 2);
+    let next = Math.max(0, roundTo(cur.weight - mult*stepBase, q));
+    return {action:"down", nextWeight:next, nextRange:`${ex.sets}×${low}–${high}`, reason:`<${low}${trend<=-1?' & Trend -':''} → −${mult}×Schritt`};
   }
-  // sonst halten
-  return { next, reason: "im Zielbereich → halten", showRange: `${ex.sets}×${low}–${high}` };
+  return {action:"hold", nextWeight:cur.weight, nextRange:`${ex.sets}×${low}–${high}`, reason:"im Zielbereich → halten & niedrigsten Satz +1"};
 }
-
-// Empfehlung basierend auf Abständen
 function hoursSince(dateStr){ if(!dateStr) return 1e9; return (Date.now()-new Date(dateStr+"T00:00:00"))/36e5; }
 function recNext(dateISO, night){
   if(night){
     const a=state.lastSessions["night_upper"]||"1970-01-01";
     const b=state.lastSessions["night_lower"]||"1970-01-01";
-    return (new Date(a)>new Date(b)) ? "night_lower" : "night_upper";
+    return (new Date(a)>new Date(b)) ? "night_lower":"night_upper";
   }
   if(hoursSince(state.lastSessions["free_pull"])>72) return "free_pull";
   if(hoursSince(state.lastSessions["free_push"])>96) return "free_push";
   if(hoursSince(state.lastSessions["free_legs"])>96) return "free_legs";
   const order=["free_push","free_pull","free_legs"];
-  const latest = order.reduce((best,k)=> (new Date(state.lastSessions[k]||"1970-01-01")>new Date(best.v||"1970-01-01")?{k,v:state.lastSessions[k]}:best),{k:"free_push",v:"1970-01-01"}).k;
+  const latest=order.reduce((best,k)=> (new Date(state.lastSessions[k]||"1970-01-01")>new Date(best.v||"1970-01-01")?{k,v:state.lastSessions[k]}:best),{k:"free_push",v:"1970-01-01"}).k;
   return order[(order.indexOf(latest)+1)%order.length];
 }
-
-function renderSuggest(){
-  const date = $("#datePick").value || fmtDate();
-  const night = $("#nightShift").checked;
-  const sess = recNext(date, night);
-  const names={night_upper:"Nachtschicht – Oberkörper",night_lower:"Nachtschicht – Unterkörper",free_push:"Freie Tage – Push",free_pull:"Freie Tage – Pull",free_legs:"Freie Tage – Beine"};
-  $("#suggestBox").innerHTML = `<span class="small">Nächste empfohlene Einheit: <b>${names[sess]}</b></span> <button id="btnApply" class="primary">Übernehmen</button>`;
-  $("#btnApply").onclick = () => loadPlan(sess);
+function muscleCoverage(){
+  const cutoff=new Date(Date.now()-7*24*3600*1000).toISOString().slice(0,10);
+  const map={push:0,pull:0,legs:0};
+  state.logs.forEach(l=>{
+    if(l.date < cutoff) return;
+    const sid=l.sessionId||"";
+    if(sid.startsWith("free_push")) map.push++;
+    else if(sid.startsWith("free_pull")) map.pull++;
+    else if(sid.startsWith("free_legs")) map.legs++;
+    else if(sid.startsWith("night_upper")) { map.push++; map.pull++; }
+    else if(sid.startsWith("night_lower")) { map.legs++; }
+  });
+  return map;
+}
+function renderMuscleStatus(){
+  const m=muscleCoverage();
+  const el=$("#muscleStatus"); if(!el) return;
+  el.innerHTML="";
+  const chip=(name,val)=>{ const ok=val>=2; const cls=ok?"ok":"warn"; const div=document.createElement("div"); div.className="chip "+cls; div.textContent=`${name} ${ok?"✅":"⚠️"} (${val}/2)`; return div; };
+  el.appendChild(chip("Push", m.push));
+  el.appendChild(chip("Pull", m.pull));
+  el.appendChild(chip("Beine", m.legs));
 }
 
-// --- UI ---
 function blockHTML(ex){
-  const last = lastLogs(ex.id,1)[0];
-  const dec  = decideNextWeight(ex);
+  const hist=lastLogs(ex.id,1);
+  const last=hist[0];
+  const dec=decideNext(ex);
+  const icon = dec.action==="up"?"⬆️":dec.action==="down"?"⬇️":"⏸️";
+  const cls = dec.action==="up"?"up":dec.action==="down"?"down":"hold";
   const lastTxt = last ? (`letztes Mal: ${last.weight??"-"} kg · ${(last.reps||[]).join("/")||"-"}`) : "kein Verlauf";
-  const sugTxt  = dec.next!=null ? (`Nächstes Mal: <b>${dec.next} kg</b> · ${dec.showRange}`) : (`Nächstes Mal: — · ${dec.showRange}`);
-  const weightPrefill = dec.next!=null ? dec.next : (last && last.weight ? last.weight : "");
+  const sugTxt = dec.nextWeight!=null ? (`${icon} <b>${dec.nextWeight} kg</b> · ${dec.nextRange}`) : (`${icon} — · ${dec.nextRange}`);
+  const prefill = dec.nextWeight!=null ? dec.nextWeight : (last && last.weight? last.weight : "");
   let repsInputs=""; for(let i=1;i<=ex.sets;i++){ repsInputs += `<input type="number" class="rep" inputmode="numeric" placeholder="Wdh" style="text-align:center">`; }
   return `<div class="card exercise" data-id="${ex.id}" data-type="${ex.type}" data-sets="${ex.sets}" data-low="${ex.reps[0]}" data-high="${ex.reps[1]}">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <h3 style="margin:0;font-size:16px">${ex.name} <span class="tag">${ex.sets}×${ex.reps[0]}–${ex.reps[1]}</span></h3>
-      <span class="small muted">${dec.reason||""}</span>
+      <span class="small muted">${dec.reason}</span>
     </div>
-    <div class="small muted">${lastTxt} · ${sugTxt}</div>
+    <div class="small muted">${lastTxt} · <span class="${cls}">${sugTxt}</span></div>
     <div class="grid" style="margin-top:6px">${repsInputs}</div>
     <div class="row" style="margin-top:8px">
-      <input type="number" class="weight" step="0.5" placeholder="Gewicht (kg)" value="${weightPrefill}">
-      <textarea class="note" rows="2" placeholder="Notiz (optional) – Griff/Tempo/RPE"></textarea>
+      <input type="number" class="weight" step="0.5" placeholder="Gewicht (kg)" value="${prefill}">
+      <textarea class="note" rows="2" placeholder="Notiz – Griff/Tempo/RPE"></textarea>
     </div>
   </div>`;
 }
-
 function paintToday(){
-  const box=$("#todayBox");
-  const t=state.today;
+  const box=$("#todayBox"); const t=state.today;
   if(!t.sessionId){ box.innerHTML='<div class="muted">Keine Einheit geladen.</div>'; return; }
   const names={night_upper:"Nachtschicht – Oberkörper",night_lower:"Nachtschicht – Unterkörper",free_push:"Freie Tage – Push",free_pull:"Freie Tage – Pull",free_legs:"Freie Tage – Beine"};
-  let html = `<div class="row" style="justify-content:space-between"><div class="tag">${names[t.sessionId]}</div><div class="muted">Datum: ${t.date}</div></div>`;
-  t.exercises.forEach(ex => html += blockHTML(ex));
-  t.addons.forEach(ex => html += blockHTML(ex));
+  let html=`<div class="row" style="justify-content:space-between"><div class="tag">${names[t.sessionId]}</div><div class="muted">Datum: ${t.date}</div></div>`;
+  t.exercises.forEach(ex=> html += blockHTML(ex));
+  t.addons.forEach(ex=> html += blockHTML(ex));
   box.innerHTML = html;
-
-  // attach autosave handlers
-  $$("#todayBox .exercise").forEach(el=>{
-    el.addEventListener("input", ()=>autosaveExercise(el));
-  });
+  $$("#todayBox .exercise").forEach(el=> el.addEventListener("input", ()=>autosaveExercise(el)));
 }
-
 function loadPlan(sessionId){
-  const date = $("#datePick").value || fmtDate();
-  const base = (PLANS[sessionId]||[]).map(x=>({...x}));
-  const addons = state.today.addons || [];
-  state.today = { date, sessionId, exercises: base, addons };
+  const date=$("#datePick").value||fmtDate();
+  const base=(PLANS[sessionId]||[]).map(x=>({...x}));
+  const addons=state.today.addons||[];
+  state.today={date,sessionId,exercises:base,addons:addons};
   store.set("today", state.today);
-  state.lastSessions[sessionId] = date; store.set("lastSessions", state.lastSessions);
-  paintToday();
+  state.lastSessions[sessionId]=date; store.set("lastSessions", state.lastSessions);
+  paintToday(); renderMuscleStatus();
 }
-
-// --- Autosave ---
 function autosaveExercise(el){
-  const id = el.getAttribute("data-id");
-  const sets = parseInt(el.getAttribute("data-sets"),10)||3;
-  const reps = $$(".rep", el).map(i=>parseInt(i.value||"0",10)).filter(v=>v>0);
-  const weight = parseFloat($(".weight", el).value||"0");
-  const note = $(".note", el).value||"";
-  if(!(reps.length>0 && weight>0)) return; // nur speichern, wenn sinnvolle Eingabe vorhanden
-
-  // remove existing log for same date/session/exercise
+  const id=el.getAttribute("data-id");
+  const reps=$$(".rep",el).map(i=>parseInt(i.value||"0",10)).filter(v=>v>0);
+  const weight=parseFloat($(".weight",el).value||"0");
+  const note=$(".note",el).value||"";
+  if(!(reps.length>0 && weight>0)) return;
   state.logs = state.logs.filter(l=> !(l.date===state.today.date && l.sessionId===state.today.sessionId && l.exerciseId===id));
-  state.logs.push({ date: state.today.date, sessionId: state.today.sessionId, exerciseId: id, reps, weight, note });
+  state.logs.push({date:state.today.date,sessionId:state.today.sessionId,exerciseId:id,reps,weight,note});
   store.set("logs", state.logs);
-
-  // nach jedem Autosave: Progression für diese Übung neu berechnen und Gewichtseintrag ggf. anpassen (für nächsten Besuch)
-  // (hier belassen wir es beim Speichern; die Vorschau aktualisiert sich beim nächsten Laden)
+  renderMuscleStatus();
 }
-
-// --- Add-Ons ---
-function buildAddonSelect(){ $("#addonSelect").innerHTML = ADDONS.map(a=>`<option value="${a.id}">${a.name}</option>`).join(""); }
+function buildAddonSelect(){ $("#addonSelect").innerHTML=ADDONS.map(a=>`<option value="${a.id}">${a.name}</option>`).join(""); }
 function addAddon(){
   if(!state.today.sessionId){ alert("Bitte zuerst 'Plan laden'."); return; }
   if((state.today.addons||[]).length>=2){ alert("Max. 2 Add-Ons."); return; }
-  const id=$("#addonSelect").value; const meta = ADDONS.find(a=>a.id===id); if(!meta) return;
-  state.today.addons = (state.today.addons||[]).concat([{...meta}]);
-  store.set("today", state.today);
-  paintToday();
+  const id=$("#addonSelect").value; const meta=ADDONS.find(a=>a.id===id); if(!meta) return;
+  state.today.addons=(state.today.addons||[]).concat([{...meta}]);
+  store.set("today", state.today); paintToday();
 }
-
-// --- Backup & CSV ---
+function extraSet(){
+  if(!state.today.sessionId){ alert("Bitte zuerst 'Plan laden'."); return; }
+  const all=[...state.today.exercises, ...(state.today.addons||[])];
+  all.forEach(ex=> ex.sets = Math.min(ex.sets+1, 6));
+  store.set("today", state.today); paintToday();
+}
 function exportCSV(){
   let rows=[["date","sessionId","exerciseId","weight","reps","note"]];
-  state.logs.forEach(l=>rows.push([l.date,l.sessionId,l.exerciseId,l.weight,(l.reps||[]).join("-"),(l.note||"").replace(/,/g,";")]));
-  const csv=rows.map(r=>r.map(x=>String(x).replace(/"/g,'""')).map(x=>`"${x}"`).join(",")).join("\n");
+  state.logs.forEach(l=> rows.push([l.date,l.sessionId,l.exerciseId,l.weight,(l.reps||[]).join("-"),(l.note||"").replace(/,/g,";")]));
+  const csv=rows.map(r=>r.map(x=>String(x).replace(/"/g,'""')).map(x=>`"${x}"`).join(",")).join("
+");
   const blob=new Blob([csv],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="training_logs.csv"; a.click();
 }
-function pasteBackup(){
-  const txt=prompt("Backup-JSON hier einfügen:"); if(!txt) return;
-  try{
-    const o=JSON.parse(txt);
-    if(Array.isArray(o.logs)) state.logs=o.logs;
-    if(o.lastSessions) state.lastSessions=o.lastSessions;
-    if(o.today) state.today=o.today;
-    store.set("logs",state.logs); store.set("lastSessions",state.lastSessions); store.set("today",state.today);
-    alert("Backup importiert."); paintToday(); renderSuggest();
-  }catch(e){ alert("Ungültiges JSON."); }
+function exportJSON(){
+  const payload = {logs:state.logs,lastSessions:state.lastSessions,steps:state.steps,caps:state.caps,plates:state.plates,today:state.today};
+  const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="training_backup.json"; a.click();
 }
-
-// --- Events ---
+function importJSON(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.logs) { state.logs=data.logs; store.set("logs",state.logs); }
+      if(data.lastSessions){ state.lastSessions=data.lastSessions; store.set("lastSessions",state.lastSessions); }
+      if(data.steps){ state.steps=data.steps; store.set("steps",state.steps); }
+      if(data.caps){ state.caps=data.caps; store.set("caps",state.caps); }
+      if(data.plates){ state.plates=data.plates; store.set("plates",state.plates); }
+      if(data.today){ state.today=data.today; store.set("today",state.today); }
+      alert("Backup importiert.");
+      paintToday(); renderMuscleStatus(); renderSuggest();
+    }catch(err){ alert("Ungültige JSON-Datei."); }
+  };
+  reader.readAsText(file);
+}
+function renderSuggest(){
+  const date=$("#datePick").value||fmtDate();
+  const night=$("#nightShift").checked;
+  const sess=recNext(date,night);
+  const names={night_upper:"Nachtschicht – Oberkörper",night_lower:"Nachtschicht – Unterkörper",free_push:"Freie Tage – Push",free_pull:"Freie Tage – Pull",free_legs:"Freie Tage – Beine"};
+  $("#suggestBox").innerHTML = `<span class="small">Nächste empfohlene Einheit: <b>${names[sess]}</b></span> <button id="btnApply" class="primary">Übernehmen</button>`;
+  $("#btnApply").onclick=()=>loadPlan(sess);
+}
 $("#btnInstall").onclick=()=>alert("iPhone: Teilen → Zum Home-Bildschirm. Danach offline nutzbar.");
-$("#btnSuggest").onclick=renderSuggest;
+$("#btnSuggest").onclick=()=>{renderSuggest(); renderMuscleStatus();};
 $("#btnLoadPlan").onclick=()=>{ const s=recNext($("#datePick").value||fmtDate(), $("#nightShift").checked); loadPlan(s); };
 $("#btnAddOn").onclick=addAddon;
-$("#btnExport").onclick=exportCSV;
-$("#btnPaste").onclick=pasteBackup;
-
-// Init
+$("#btnExtraSet").onclick=extraSet;
+$("#btnExportCSV").onclick=exportCSV;
+$("#btnExportJSON").onclick=exportJSON;
+$("#btnImportJSON").onclick=()=>$("#fileJSON").click();
+$("#fileJSON").addEventListener("change", (e)=>{ const f=e.target.files?.[0]; if(f) importJSON(f); });
 $("#datePick").value = state.today.date || fmtDate();
-buildAddonSelect();
-paintToday();
-renderSuggest();
+buildAddonSelect(); renderSuggest(); renderMuscleStatus(); paintToday();
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("service-worker.js"); }
 </script>
 </body>

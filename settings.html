@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Einstellungen – TrainingCoach 13.7</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0f1c">
+<style>
+:root{--bg:#0a0f1c;--panel:#0d162a;--text:#eaf0ff;--muted:#93a3b8;--line:#1b2c4f;--accent:#60a5fa}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(180deg,#090e1a,#0c1428);color:var(--text)}
+header{position:sticky;top:0;z-index:5;background:#0a1120;border-bottom:1px solid var(--line);padding:12px 14px;display:flex;gap:10px;align-items:center}
+h1{font-size:18px;margin:0;font-weight:700}.badge{font-size:11px;background:#132240;color:#93c5fd;padding:3px 8px;border-radius:999px;margin-left:8px}
+a.nav{margin-left:auto;color:#93c5fd;text-decoration:none;border:1px solid var(--line);padding:6px 10px;border-radius:10px}
+main{padding:14px;display:flex;flex-direction:column;gap:12px}
+.panel{background:#0d162a;border:1px solid var(--line);border-radius:14px;padding:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input{background:#0a1120;color:#e5e7eb;border:1px solid #223b6a;border-radius:10px;padding:10px;width:120px}
+label{font-size:13px}
+button{background:#122242;color:#e2e8f0;border:1px solid #274b87;padding:10px 14px;border-radius:10px;font-weight:600}
+button.primary{background:#3b82f6;border-color:#3b82f6}
+.muted{color:#93a3b8;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Einstellungen <span class="badge">V13.7</span></h1>
+  <a class="nav" href="index.html">Zurück</a>
+</header>
+<main>
+  <div class="panel">
+    <h2 style="margin:0;font-size:16px">Mikro-Progression (Basis-Schritte, kg)</h2>
+    <div class="row">
+      <label>Press <input type="number" id="step_press" step="0.5"></label>
+      <label>Row <input type="number" id="step_row" step="0.5"></label>
+      <label>Iso <input type="number" id="step_iso" step="0.5"></label>
+      <label>Lower <input type="number" id="step_lower" step="0.5"></label>
+    </div>
+    <div class="muted">Tipp: Klimmzüge 0,5 kg • Shrugs 1,0 kg • Unterkörper 2,5 kg</div>
+  </div>
+  <div class="panel">
+    <h2 style="margin:0;font-size:16px">Adaptive Sprung-Kappen (Multiplikator)</h2>
+    <div class="row">
+      <label>Press up/down <input type="number" id="cap_press_up" step="1"> <input type="number" id="cap_press_down" step="1"></label>
+      <label>Row up/down <input type="number" id="cap_row_up" step="1"> <input type="number" id="cap_row_down" step="1"></label>
+      <label>Iso up/down <input type="number" id="cap_iso_up" step="1"> <input type="number" id="cap_iso_down" step="1"></label>
+      <label>Lower up/down <input type="number" id="cap_lower_up" step="1"> <input type="number" id="cap_lower_down" step="1"></label>
+    </div>
+  </div>
+  <div class="panel">
+    <h2 style="margin:0;font-size:16px">Hantelscheiben-Rasterung</h2>
+    <div class="row">
+      <label>Rundung auf (kg) <input type="number" id="quantum" step="0.25"></label>
+      <div class="muted">typisch 0,5 kg; Powerlifting-Gyms: 1,25 kg</div>
+    </div>
+  </div>
+  <div class="row">
+    <button id="btn_save" class="primary">Alles speichern</button>
+  </div>
+</main>
+<script>
+const $=(q,el=document)=>el.querySelector(q);
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
+const defaultSteps={iso:0.5, press:1.0, row:1.0, lower:2.5};
+const steps=store.get("steps", defaultSteps);
+const caps=store.get("caps", {iso:{up:3,down:2}, press:{up:3,down:2}, row:{up:3,down:2}, lower:{up:2,down:2}});
+const plates=store.get("plates", {quantum:0.5});
+
+function load(){
+  $("#step_press").value = steps.press ?? 1.0;
+  $("#step_row").value   = steps.row ?? 1.0;
+  $("#step_iso").value   = steps.iso ?? 0.5;
+  $("#step_lower").value = steps.lower ?? 2.5;
+  ["press","row","iso","lower"].forEach(t=>{
+    $("#cap_"+t+"_up").value = caps[t]?.up ?? 2;
+    $("#cap_"+t+"_down").value = caps[t]?.down ?? 2;
+  });
+  $("#quantum").value = plates.quantum ?? 0.5;
+}
+function save(){
+  steps.press = parseFloat($("#step_press").value||"1");
+  steps.row   = parseFloat($("#step_row").value||"1");
+  steps.iso   = parseFloat($("#step_iso").value||"0.5");
+  steps.lower = parseFloat($("#step_lower").value||"2.5");
+  store.set("steps", steps);
+  ["press","row","iso","lower"].forEach(t=>{
+    caps[t] = {up: parseInt($("#cap_"+t+"_up").value||"2",10), down: parseInt($("#cap_"+t+"_down").value||"2",10)};
+  });
+  store.set("caps", caps);
+  plates.quantum = parseFloat($("#quantum").value||"0.5");
+  store.set("plates", plates);
+  alert("Gespeichert.");
+}
+document.getElementById("btn_save").addEventListener("click", save);
+load();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("service-worker.js"); }
+</script>
+</body>
+</html>
