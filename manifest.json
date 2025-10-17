@@ -1,10 +1,10 @@
 {
-  "name": "TrainingCoach V13.10 AI‑Pro",
-  "short_name": "Coach 13.10",
+  "name": "Gym AI",
+  "short_name": "Gym AI 13.9",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#0a0f1c",
   "theme_color": "#0a0f1c",
+  "background_color": "#0a0f1c",
   "icons": [
     {
       "src": "icon.png",
