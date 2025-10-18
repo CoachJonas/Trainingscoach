@@ -1,341 +1,108 @@
-<!doctype html>
-<html lang="de">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gym AI 13.10 Pro</title>
-<meta name="theme-color" content="#0a0f1c">
-<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrainingCoach v13.10.1 AutoDetect Pro</title>
 <style>
-:root{--bg:#0a0f1c;--card:#0e1830;--line:#193261;--fg:#e8eefc;--mut:#9fb4d8}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto}
-.wrap{max-width:980px;margin:12px auto;padding:0 12px}
-.head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:#0c1733;border-bottom:1px solid #1c2e57;position:sticky;top:0;padding:10px 12px;z-index:5}
-.btn{background:#152854;border:1px solid #2a4c8f;color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px}
-.small{padding:6px 10px;font-size:13px}
-.tag{padding:2px 8px;border:1px solid #2a4c8f;border-radius:999px;font-size:12px;color:#cfe4ff}
-.row{background:#0e1830;border:1px solid #193261;border-radius:14px;padding:12px;margin:12px 0}
-.grid{display:grid;gap:10px}
-.two{grid-template-columns:1fr 1fr}
-input,textarea,select{width:100%;background:#0a1326;border:1px solid #203c75;color:var(--fg);border-radius:10px;padding:8px 10px}
-textarea{min-height:60px}
-.ex{background:#0b1430;border:1px solid #1c2e57;border-radius:12px;padding:10px;margin:8px 0}
-.mut{color:var(--mut);font-size:13px}
-hr{border:0;border-top:1px solid #1c2e57;margin:8px 0}
+  body {
+    font-family: Arial, sans-serif;
+    background: #0d0d0d;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background: #1c1c1c;
+    padding: 10px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  section {
+    padding: 15px;
+  }
+  select, input, button, textarea {
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+  }
+  button {
+    background: #007bff;
+    color: #fff;
+    font-weight: bold;
+  }
+  .exercise {
+    background: #1a1a1a;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .note {
+    background: #222;
+    color: #ccc;
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 6px;
+  }
 </style>
 </head>
 <body>
-<div class="head">
-  <div><strong>Gym AI</strong> <span class="tag">v13.10 Pro</span></div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap">
-    <button id="btnBackupText" class="btn small">Backup-Text einfügen</button>
-    <button id="btnCsv" class="btn small">CSV Export</button>
-    <button id="btnInstall" class="btn small">Zum Home-Bildschirm</button>
-  </div>
-</div>
+<header>TrainingCoach v13.10.1 AutoDetect Pro</header>
 
-<div class="wrap">
+<section>
+  <h3 id="status">Loading data...</h3>
 
-  <div class="row grid two">
-    <div>
-      <div class="mut">Empfehlung</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-        <span id="rec" class="tag">—</span>
-        <button class="btn small" id="btnRec">Empfehlen</button>
-        <button class="btn small" id="btnApply">Übernehmen</button>
-      </div>
-      <div class="mut" id="coverage" style="margin-top:6px"></div>
-    </div>
-    <div>
-      <label><input type="checkbox" id="night"> Nachtschicht heute?</label>
-      <label>Datum</label>
-      <input type="date" id="d">
-    </div>
+  <button id="loadBackupBtn">📂 Load Backup (CSV/Text)</button>
+  <button id="saveBackupBtn">💾 Export CSV</button>
+
+  <div>
+    <label>Session:</label>
+    <select id="sessionSelect">
+      <option value="night_upper">Night Upper</option>
+      <option value="night_lower">Night Lower</option>
+      <option value="free_push">Free Push</option>
+      <option value="free_pull">Free Pull</option>
+      <option value="free_legs">Free Legs</option>
+    </select>
   </div>
 
-  <div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-    <div><strong>Heutige Einheit:</strong> <span id="title" class="tag">—</span></div>
-    <div>
-      <button class="btn small" id="btnLoad">Plan laden</button>
-      <button class="btn small" id="btnExtra">+ Satz</button>
-    </div>
-  </div>
-
-  <div id="box"></div>
-
-  <div class="row">
-    <div style="display:flex;gap:8px;align-items:center">
-      <select id="addon"></select>
-      <button class="btn small" id="btnAddOn">+ Add-On</button>
-    </div>
-    <div class="mut" style="margin-top:6px">Max. 2 Add-Ons (z. B. Überzüge am Kabelzug).</div>
-  </div>
-
-</div>
-
-<!-- Backup modal -->
-<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);align-items:center;justify-content:center;z-index:50">
-  <div style="width:min(760px,92%);background:#0b1430;border:1px solid #1c2e57;border-radius:12px;padding:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <strong>Backup-Text einfügen</strong>
-      <button id="mclose" class="btn small">Schließen</button>
-    </div>
-    <hr/>
-    <textarea id="mtext" placeholder="Füge hier den kompletten Inhalt deiner training_logs (JSON oder CSV) ein."></textarea>
-    <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
-      <button id="mimport" class="btn">Importieren</button>
-    </div>
-  </div>
-</div>
+  <div id="exerciseContainer"></div>
+</section>
 
 <script>
-const $=q=>document.querySelector(q), $$=(q,el=document)=>Array.from(el.querySelectorAll(q));
-const fmtDate=()=>{const z=new Date().getTimezoneOffset()*60000;return new Date(Date.now()-z).toISOString().slice(0,10)};
+let trainingData = JSON.parse(localStorage.getItem("trainingData") || "[]");
 
-const INITIAL_LOGS = [
-  {"date":"2025-10-04","sessionId":"night_upper","exerciseId":"incl_db","weight":45,"reps":[10,10,10],"note":""},
-  {"date":"2025-10-04","sessionId":"night_upper","exerciseId":"pullup","weight":87.5,"reps":[8,8,9],"note":""},
-  {"date":"2025-10-04","sessionId":"night_upper","exerciseId":"row_low","weight":40,"reps":[9,9,10],"note":""},
-  {"date":"2025-10-04","sessionId":"night_upper","exerciseId":"ohp","weight":35,"reps":[10,10,10],"note":""},
-  {"date":"2025-10-04","sessionId":"night_upper","exerciseId":"laterals","weight":15,"reps":[12,12],"note":""},
-  {"date":"2025-10-04","sessionId":"night_upper","exerciseId":"facepull","weight":23,"reps":[15,15],"note":""},
-  {"date":"2025-10-06","sessionId":"night_upper","exerciseId":"pullup","weight":87.5,"reps":[10,9,10],"note":""},
-  {"date":"2025-10-06","sessionId":"night_upper","exerciseId":"row_low","weight":42.5,"reps":[10,10,10],"note":""},
-  {"date":"2025-10-06","sessionId":"night_upper","exerciseId":"incl_db","weight":47.5,"reps":[6,7,10],"note":""},
-  {"date":"2025-10-06","sessionId":"night_upper","exerciseId":"ohp","weight":37.5,"reps":[8,9,10],"note":""},
-  {"date":"2025-10-06","sessionId":"night_upper","exerciseId":"laterals","weight":12.25,"reps":[15,13],"note":""},
-  {"date":"2025-10-06","sessionId":"night_upper","exerciseId":"facepull","weight":25,"reps":[15,14],"note":""},
-  {"date":"2025-10-06","sessionId":"night_upper","exerciseId":"cable_pullover","weight":27,"reps":[15,15,15],"note":""},
-  {"date":"2025-10-08","sessionId":"free_pull","exerciseId":"lat_narrow","weight":90,"reps":[8,7,9],"note":"Latzug Maschine UG"},
-  {"date":"2025-10-08","sessionId":"free_pull","exerciseId":"row_tbar","weight":30,"reps":[10,10,10,10],"note":"Low Row Maschine  im sitzen"},
-  {"date":"2025-10-08","sessionId":"free_pull","exerciseId":"pullup_w","weight":23,"reps":[9,10,10,10],"note":"Maschine OG -23"},
-  {"date":"2025-10-08","sessionId":"free_pull","exerciseId":"rdl2","weight":25,"reps":[10,10,10,10],"note":"Eisenstange UG; letzter Satz +2;5kg"},
-  {"date":"2025-10-08","sessionId":"free_pull","exerciseId":"shrugs","weight":22.5,"reps":[10,10,12],"note":"22;5kg Hantel"},
-  {"date":"2025-10-08","sessionId":"free_pull","exerciseId":"bi_curls","weight":12.5,"reps":[12,12,12],"note":"Carl Maschine UG"},
-  {"date":"2025-10-08","sessionId":"free_pull","exerciseId":"hammer","weight":10,"reps":[10,10,12],"note":"10kg Hantel"},
-  {"date":"2025-10-08","sessionId":"free_pull","exerciseId":"cable_pullover","weight":32,"reps":[15,15,15],"note":""},
-  {"date":"2025-10-09","sessionId":"free_legs","exerciseId":"squat_press2","weight":22.5,"reps":[10,10,10,10],"note":""},
-  {"date":"2025-10-09","sessionId":"free_legs","exerciseId":"front","weight":22.5,"reps":[11,11,11],"note":""},
-  {"date":"2025-10-09","sessionId":"free_legs","exerciseId":"legext2","weight":55,"reps":[13,13,13],"note":""},
-  {"date":"2025-10-09","sessionId":"free_legs","exerciseId":"legcurl2","weight":10,"reps":[11,11,11],"note":""},
-  {"date":"2025-10-09","sessionId":"free_legs","exerciseId":"calf_stand","weight":85,"reps":[14,14,14,14],"note":""},
-  {"date":"2025-10-09","sessionId":"free_legs","exerciseId":"calf_sit","weight":25,"reps":[12,12,12,12],"note":""},
-  {"date":"2025-10-09","sessionId":"free_legs","exerciseId":"rope_crunch","weight":38.5,"reps":[13,13,13],"note":""},
-  {"date":"2025-10-09","sessionId":"free_legs","exerciseId":"abs2","weight":5,"reps":[14,14,14],"note":"Unterbauch"},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"pullup_w","weight":20.3,"reps":[6,7,8,10],"note":""},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"row_tbar","weight":35,"reps":[15,15,13,11],"note":""},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"lat_narrow","weight":90,"reps":[8,8,9],"note":""},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"rdl2","weight":27.5,"reps":[12,12,11,12],"note":""},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"shrugs","weight":24,"reps":[8,10,14],"note":""},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"bi_curls","weight":13.75,"reps":[12,12,12],"note":""},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"hammer","weight":12,"reps":[8,9,10],"note":""},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"cable_pullover","weight":36,"reps":[15,15,15],"note":""},
-  {"date":"2025-10-11","sessionId":"free_pull","exerciseId":"rope_crunch","weight":41,"reps":[11,10,10],"note":""},
-  {"date":"2025-10-13","sessionId":"night_upper","exerciseId":"incl_db","weight":47.5,"reps":[10,10,7],"note":""},
-  {"date":"2025-10-13","sessionId":"night_upper","exerciseId":"pullup","weight":90,"reps":[10,8,7],"note":""},
-  {"date":"2025-10-13","sessionId":"night_upper","exerciseId":"row_low","weight":45,"reps":[10,10,9],"note":""},
-  {"date":"2025-10-13","sessionId":"night_upper","exerciseId":"ohp","weight":40,"reps":[10,10,7],"note":""},
-  {"date":"2025-10-13","sessionId":"night_upper","exerciseId":"laterals","weight":14,"reps":[12],"note":""},
-  {"date":"2025-10-13","sessionId":"night_upper","exerciseId":"facepull","weight":27,"reps":[12,14],"note":""}
-];
+function renderExercises(sessionId) {
+  const container = document.getElementById("exerciseContainer");
+  container.innerHTML = "";
 
-const LS_DATA='gymai_logs_v1310', LS_TODAY='gymai_today_v1310';
-
-let data = JSON.parse(localStorage.getItem(LS_DATA)||'[]');
-if(data.length===0 && INITIAL_LOGS.length>0){ data = INITIAL_LOGS; localStorage.setItem(LS_DATA, JSON.stringify(data)); }
-let today = JSON.parse(localStorage.getItem(LS_TODAY)||JSON.stringify({date:fmtDate(),sessionId:null,addons:[]}));
-
-const PLANS={night_upper:[
-  {id:'incl_db',name:'Schrägbankdrücken KH',sets:3,reps:[6,10],type:'press'},
-  {id:'pullup',name:'Klimmzüge/Latzug',sets:3,reps:[6,10],type:'row'},
-  {id:'row_low',name:'Rudern Low Row',sets:3,reps:[6,10],type:'row'},
-  {id:'ohp',name:'Schulterdrücken',sets:3,reps:[6,10],type:'press'},
-  {id:'laterals',name:'Seitheben',sets:2,reps:[12,15],type:'iso'},
-  {id:'facepull',name:'Face Pulls',sets:2,reps:[12,15],type:'iso'}
-],night_lower:[
-  {id:'squat_press',name:'Kniebeugen/Beinpresse',sets:3,reps:[6,10],type:'lower'},
-  {id:'rdl',name:'Gestrecktes KH',sets:3,reps:[6,10],type:'lower'},
-  {id:'legext',name:'Beinstrecker',sets:2,reps:[12,15],type:'iso'},
-  {id:'legcurl',name:'Beinbeuger',sets:2,reps:[12,15],type:'iso'},
-  {id:'calf',name:'Wadenheben',sets:3,reps:[12,20],type:'iso'},
-  {id:'abs',name:'Bauch',sets:2,reps:[12,15],type:'iso'}
-],free_push:[
-  {id:'bb_flat',name:'Flachbankdrücken LH',sets:4,reps:[6,10],type:'press'},
-  {id:'db_incline',name:'Schrägbankdrücken KH',sets:4,reps:[6,10],type:'press'},
-  {id:'dips',name:'Dips',sets:3,reps:[8,12],type:'press'},
-  {id:'ohp_m',name:'Schulterdrücken',sets:3,reps:[8,12],type:'press'},
-  {id:'laterals_v',name:'Seitheben',sets:3,reps:[12,15],type:'iso'},
-  {id:'revfly',name:'Reverse Flys',sets:3,reps:[12,15],type:'iso'},
-  {id:'tri_push',name:'Trizepsdrücken',sets:3,reps:[8,12],type:'iso'}
-],free_pull:[
-  {id:'pullup_w',name:'Klimmzüge breit',sets:4,reps:[6,10],type:'row'},
-  {id:'row_tbar',name:'Rudern LH/T-Bar',sets:4,reps:[6,10],type:'row'},
-  {id:'lat_narrow',name:'Latzug eng',sets:3,reps:[8,12],type:'row'},
-  {id:'rdl2',name:'Gestrecktes KH',sets:4,reps:[6,10],type:'lower'},
-  {id:'shrugs',name:'Shrugs',sets:3,reps:[10,12],type:'iso'},
-  {id:'bi_curls',name:'Bizepscurls',sets:3,reps:[8,12],type:'iso'},
-  {id:'hammer',name:'Hammercurls',sets:3,reps:[8,12],type:'iso'}
-],free_legs:[
-  {id:'squat_press2',name:'Kniebeugen/Beinpresse',sets:4,reps:[6,10],type:'lower'},
-  {id:'front',name:'Frontkniebeugen',sets:3,reps:[8,12],type:'lower'},
-  {id:'legext2',name:'Beinstrecker',sets:3,reps:[12,15],type:'iso'},
-  {id:'legcurl2',name:'Beinbeuger',sets:3,reps:[12,15],type:'iso'},
-  {id:'calf_stand',name:'Waden stehend',sets:4,reps:[12,20],type:'iso'},
-  {id:'calf_sit',name:'Waden sitzend',sets:4,reps:[12,20],type:'iso'},
-  {id:'abs2',name:'Bauch',sets:3,reps:[12,15],type:'iso'}
-]};
-
-const ADDONS=[
-  {id:'cable_pullover',name:'Überzüge am Kabelzug',sets:3,reps:[12,15],type:'iso'},
-  {id:'facepull_add',name:'Face Pulls',sets:2,reps:[12,15],type:'iso'},
-  {id:'rope_crunch',name:'Cable Crunch',sets:3,reps:[12,15],type:'iso'}
-];
-
-const RULES = {
-  iso:{min:0.5,max:1.0,upHi:0.025,upMed:0.0125,down:0.025,q:0.5},
-  press:{min:1.0,max:2.5,upHi:0.03,upMed:0.02,down:0.03,q:0.5},
-  row:{min:1.0,max:2.5,upHi:0.03,upMed:0.02,down:0.03,q:0.5},
-  lower:{min:2.5,max:5.0,upHi:0.05,upMed:0.03,down:0.04,q:0.5}
-};
-const names={night_upper:'Nachtschicht – Oberkörper',night_lower:'Nachtschicht – Unterkörper',free_push:'Freie Tage – Push',free_pull:'Freie Tage – Pull',free_legs:'Freie Tage – Beine'};
-
-function hoursSince(dateStr){ if(!dateStr) return 1e9; return (Date.now()-new Date(dateStr+'T00:00:00Z'))/36e5 }
-function recNext(night){
-  const last={}; data.forEach(l=> last[l.sessionId]=l.date);
-  if(night){ return (new Date(last['night_upper']||'1970-01-01')>new Date(last['night_lower']||'1970-01-01'))?'night_lower':'night_upper'; }
-  if(hoursSince(last['free_pull'])>72) return 'free_pull';
-  if(hoursSince(last['free_push'])>96) return 'free_push';
-  if(hoursSince(last['free_legs'])>96) return 'free_legs';
-  const order=['free_push','free_pull','free_legs'];
-  const latest=order.reduce((b,k)=> (new Date(last[k]||'1970-01-01')>new Date(b.v||'1970-01-01')?{k,v:last[k]}:b),{k:'free_push',v:'1970-01-01'}).k;
-  return order[(order.indexOf(latest)+1)%order.length];
-}
-function roundQ(v,q){return Math.round(v/q)*q}
-function lastFor(id){ const arr=data.filter(l=>l.exerciseId===id).sort((a,b)=>b.date.localeCompare(a.date)); return arr[0]||null; }
-function decide(ex){
-  const r=RULES[ex.type]||RULES.press, [lo,hi]=ex.reps, last=lastFor(ex.id);
-  if(!last) return {next:null, reps:`${ex.sets}×${lo}–${hi}`, msg:'neu einarbeiten'};
-  const reps=last.reps||[], worst=Math.min(...reps);
-  const upperThird=hi-Math.ceil((hi-lo)/3);
-  const inUpper=reps.filter(x=>x>=upperThird).length;
-  const below=reps.filter(x=>x<lo).length;
-  const step=p=>Math.max(r.min,Math.min(r.max,p*last.weight));
-  const apply=(sgn,kg)=>roundQ(Math.max(0,last.weight+sgn*kg),r.q);
-  if(worst>=hi) return {next:apply(+1,step(r.upHi)), reps:`${ex.sets}×${lo}–${hi}`, msg:`alle ≥${hi} → +`};
-  if(inUpper>=Math.ceil(ex.sets/2)) return {next:apply(+1,step(r.upMed)), reps:`${ex.sets}×${lo}–${hi}`, msg:`oberer Bereich → +`};
-  if(below>=Math.ceil(ex.sets/2)) return {next:apply(-1,step(r.down)), reps:`${ex.sets}×${lo}–${hi}`, msg:`unter Soll → −`};
-  return {next:last.weight, reps:`${ex.sets}×${lo}–${hi}`, msg:'halten'};
-}
-function exCard(ex){
-  const dec=decide(ex), last=lastFor(ex.id);
-  let inputs=''; for(let i=0;i<ex.sets;i++) inputs+=`<input class="rep" type="number" inputmode="numeric" placeholder="Wdh" style="text-align:center">`;
-  const pref=dec.next??(last?last.weight:'');
-  return `<div class="ex" data-id="${ex.id}" data-sets="${ex.sets}">
-    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-      <strong>${ex.name}</strong>
-      <span class="mut">${dec.msg} <b>${dec.next??'—'} kg</b> · Ziel ${dec.reps}</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">${inputs}</div>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-      <input class="w" type="number" step="0.5" value="${pref||''}" placeholder="Gewicht (kg)" style="width:140px">
-      <textarea class="note" placeholder="Notiz (optional)"></textarea>
-    </div>
-  </div>`;
-}
-function render(){
-  document.getElementById('title').textContent = today.sessionId? (names[today.sessionId]+' · '+today.date) : '—';
-  const list = today.sessionId? (PLANS[today.sessionId]||[]) : [];
-  let html=''; list.forEach(e=> html+=exCard(e)); (today.addons||[]).forEach(e=> html+=exCard(e));
-  document.getElementById('box').innerHTML=html;
-  $$('.ex').forEach(el=> el.addEventListener('input', ()=>saveSet(el)));
-}
-function saveSet(el){
-  const id=el.getAttribute('data-id'), sets=parseInt(el.getAttribute('data-sets'),10);
-  const reps=$$('.rep',el).map(x=>parseInt(x.value||'0',10)).filter(v=>v>0).slice(0,sets);
-  const w=parseFloat($('.w',el).value||'0'); const note=$('.note',el).value||'';
-  if(!(reps.length>0 && w>0)) return;
-  data = data.filter(l=>!(l.date===today.date && l.sessionId===today.sessionId && l.exerciseId===id));
-  data.push({date:today.date, sessionId:today.sessionId, exerciseId:id, weight:w, reps, note});
-  localStorage.setItem(LS_DATA, JSON.stringify(data));
-}
-function loadPlan(sid){
-  today={date:($('#d').value||fmtDate()), sessionId:sid, addons:(today.addons||[])};
-  localStorage.setItem(LS_TODAY, JSON.stringify(today));
-  render(); coverage();
-}
-function coverage(){
-  const cut = new Date(Date.now()-7*24*3600*1000).toISOString().slice(0,10);
-  const cnt={push:0,pull:0,legs:0};
-  data.forEach(l=>{ if(l.date<cut) return;
-    if(l.sessionId?.startsWith('free_push')) cnt.push++;
-    else if(l.sessionId?.startsWith('free_pull')) cnt.pull++;
-    else if(l.sessionId?.startsWith('free_legs')) cnt.legs++;
-    else if(l.sessionId==='night_upper'){cnt.push++;cnt.pull++;}
-    else if(l.sessionId==='night_lower') cnt.legs++;
-  });
-  $('#coverage').textContent = `Abdeckung 7T: Push ${cnt.push}/2, Pull ${cnt.pull}/2, Beine ${cnt.legs}/2`;
-}
-
-// Buttons
-$('#d').value = today.date || fmtDate();
-$('#btnRec').onclick=()=>{ const s=recNext($('#night').checked); $('#rec').textContent = names[s]; $('#btnApply').onclick=()=>loadPlan(s); };
-$('#btnApply').onclick=()=>{};
-$('#btnLoad').onclick=()=>{ const s=recNext($('#night').checked); loadPlan(s); };
-$('#btnExtra').onclick=()=>{ if(!today.sessionId) return; (PLANS[today.sessionId]||[]).forEach(e=>e.sets=Math.min(e.sets+1,6)); render(); };
-$('#btnCsv').onclick=()=>{ let rows=[['date','sessionId','exerciseId','weight','reps','note']]; data.forEach(l=>rows.push([l.date,l.sessionId,l.exerciseId,l.weight,(l.reps||[]).join('-'),l.note||''])); const csv=rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='training_logs.csv'; a.click(); };
-
-// Backup modal
-const modal=$('#modal'); $('#btnBackupText').onclick=()=>{ modal.style.display='flex'; };
-$('#mclose').onclick=()=>{ modal.style.display='none'; };
-$('#mimport').onclick=()=>{
-  const raw = $('#mtext').value.trim(); if(!raw){ alert('Feld ist leer.'); return; }
-  let logs=null;
-  try{ const obj = JSON.parse(raw); logs = Array.isArray(obj) ? obj : (obj.logs || obj.data || []); }
-  catch(e){
-    const lines = raw.split(/\r?\n/).filter(x=>x.trim().length);
-    const head = lines.shift().split(',').map(h=>h.replace(/"/g,'').trim().toLowerCase());
-    const col = n => head.findIndex(h=>h===n);
-    const iDate=col('date'), iSess=col('sessionid'), iEx=col('exerciseid'), iW=col('weight'), iR=col('reps'), iNote=col('note');
-    logs = lines.map(line=>{
-      const c=line.split(',').map(x=>x.replace(/(^"|"$)/g,''));
-      return {date:c[iDate], sessionId:c[iSess], exerciseId:c[iEx], weight:Number(c[iW]||0), reps:(c[iR]||'').split('-').map(x=>parseInt(x||'0',10)).filter(v=>v>0), note:c[iNote]||''};
-    }).filter(r=>r.date && r.exerciseId);
+  const sessionExercises = trainingData.filter(x => x.sessionId === sessionId);
+  if (sessionExercises.length === 0) {
+    container.innerHTML = "<p>No data for this session.</p>";
+    return;
   }
-  if(!Array.isArray(logs) || logs.length===0){ alert('Konnte die Daten nicht verstehen. JSON oder CSV einfügen.'); return; }
-  const key = r => [r.date,r.sessionId,r.exerciseId,JSON.stringify(r.reps),r.weight].join('|');
-  const map = new Map((data||[]).map(r=>[key(r),r]));
-  logs.forEach(r=> map.set(key(r), r));
-  data = Array.from(map.values()).sort((a,b)=>a.date.localeCompare(b.date));
-  localStorage.setItem(LS_DATA, JSON.stringify(data));
-  modal.style.display='none';
-  alert('Import ok: '+logs.length+' Sätze.'); coverage(); render();
-};
 
-// Add-ons
-$('#addon').innerHTML = ['','cable_pullover','facepull_add','rope_crunch'].map(id=> id?`<option value="${id}">${id==='cable_pullover'?'Überzüge am Kabelzug':(id==='facepull_add'?'Face Pulls':'Cable Crunch')}</option>`:'<option value="">— Add-On wählen —</option>').join('');
-$('#btnAddOn').onclick=()=>{ if(!today.sessionId) return; const id=$('#addon').value; if(!id) return; const meta=(id==='cable_pullover')?{id,name:'Überzüge am Kabelzug',sets:3,reps:[12,15],type:'iso'}:(id==='facepull_add'?{id,name:'Face Pulls',sets:2,reps:[12,15],type:'iso'}:{id,name:'Cable Crunch',sets:3,reps:[12,15],type:'iso'}); today.addons=(today.addons||[]).concat([meta]).slice(0,2); localStorage.setItem(LS_TODAY, JSON.stringify(today)); render(); };
-
-// Initial paint
-coverage(); render();
-
-// Install hint
-$('#btnInstall').onclick=()=>{ alert('In Safari: Teilen → Zum Home-Bildschirm.'); };
-
-// Single-file Service Worker (Blob)
-if('serviceWorker' in navigator){
-  const swCode = `
-self.addEventListener('install',e=>{
-  e.waitUntil(caches.open('gym-ai-13-10-onefile').then(c=>c.addAll(['./'])));
-});
-self.addEventListener('fetch',e=>{
-  e.respondWith(caches.match(e.request).then(r=> r || fetch(e.request)));
-});
-  `;
-  const blob = new Blob([swCode], {type:'text/javascript'});
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(()=>{});
+  sessionExercises.forEach((ex, i) => {
+    const div = document.createElement("div");
+    div.className = "exercise";
+    div.innerHTML = `
+      <h4>${ex.exerciseId}</h4>
+      <p>Last: ${ex.weight} kg × ${ex.reps}</p>
+      <p class="note">${ex.note || ""}</p>
+      <p><b>Coach:</b> ${getNextWeightSuggestion(ex)}</p>
+    `;
+    container.appendChild(div);
+  });
 }
-</script>
-</body>
-</html>
+
+function getNextWeightSuggestion(ex) {
+  const reps = ex.reps.split("-").map(x => parseInt(x));
+  const avg = reps.reduce((a,b)=>a+b,0) / reps.length;
+  if (avg >= 10) return "↑ +2.5 kg next time";
+  if (avg <= 6) return "↓ −1 kg next time";
+  return "= keep weight";
+}
